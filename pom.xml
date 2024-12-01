@@ -5,7 +5,7 @@
 
   <groupId>cn.itmtx.ezcache</groupId>
   <artifactId>ezcache-parent</artifactId>
-  <version>1.0.0</version>
+  <version>${revision}</version>
   <packaging>pom</packaging>
   <name>${project.artifactId}</name>
   <modules>
@@ -17,6 +17,7 @@
   </modules>
 
   <properties>
+    <revision>1.0.0</revision>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>${maven.compiler.source}</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
