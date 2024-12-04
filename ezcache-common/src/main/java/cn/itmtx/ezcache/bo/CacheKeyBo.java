@@ -5,7 +5,7 @@ import java.io.Serializable;
 /**
  * business object for cache key
  */
-public class EzCacheKeyBo  implements Serializable {
+public class CacheKeyBo implements Serializable {
 
     /**
      * cache namespace
@@ -16,6 +16,14 @@ public class EzCacheKeyBo  implements Serializable {
      * cache key
      */
     private String key;
+
+    public CacheKeyBo() {
+    }
+
+    public CacheKeyBo(String namespace, String key) {
+        this.namespace = namespace;
+        this.key = key;
+    }
 
     public String getNamespace() {
         return namespace;

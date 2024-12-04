@@ -1,23 +1,23 @@
 package cn.itmtx.ezcache.bo;
 
 import cn.itmtx.ezcache.annotation.EzCache;
-import cn.itmtx.ezcache.proxy.IEzCacheProxy;
+import cn.itmtx.ezcache.proxy.ICacheProxy;
 
 import java.io.Serializable;
 
 /**
  * 用于处理自动加载数据到缓存
  */
-public class AutoLoadBo implements Serializable {
+public class AutoRefreshBo implements Serializable {
 
-    private final IEzCacheProxy proxy;
+    private final ICacheProxy proxy;
 
     private final Object[] args;
 
     /**
      * 缓存Key
      */
-    private final EzCacheKeyBo cacheKey;
+    private final CacheKeyBo cacheKey;
 
     /**
      * 缓存注解
@@ -64,7 +64,7 @@ public class AutoLoadBo implements Serializable {
      */
     private long loadDataTotalTimeMillis = 0L;
 
-    public AutoLoadBo(IEzCacheProxy proxy, Object[] args, EzCacheKeyBo cacheKey, EzCache cache, long expireTimeMils) {
+    public AutoRefreshBo(ICacheProxy proxy, Object[] args, CacheKeyBo cacheKey, EzCache cache, long expireTimeMils) {
         this.proxy = proxy;
         this.args = args;
         this.cacheKey = cacheKey;
@@ -72,13 +72,13 @@ public class AutoLoadBo implements Serializable {
         this.expireTimeMils = expireTimeMils;
     }
 
-    public void flushRequestTime(EzCacheBo<Object> ezCacheBo) {
+    public void flushRequestTime(CacheWrapper<Object> cacheWrapper) {
         // 同步最后加载时间
         this.setLastRequestTime(System.currentTimeMillis())
                 // 同步加载时间
-                .setLastLoadTimeMillis(ezCacheBo.getLastLoadTimeMillis())
+                .setLastLoadTimeMillis(cacheWrapper.getLastLoadTimeMillis())
                 // 同步过期时间
-                .setExpireTimeMils(ezCacheBo.getExpireMillis());
+                .setExpireTimeMils(cacheWrapper.getExpireMillis());
     }
 
     /**
@@ -87,7 +87,7 @@ public class AutoLoadBo implements Serializable {
      * @param loadTimeMillis 用时
      * @return this
      */
-    public AutoLoadBo addTotalLoadDataTime(long loadTimeMillis) {
+    public AutoRefreshBo addTotalLoadDataTime(long loadTimeMillis) {
         synchronized (this) {
             this.loadCount ++;
             this.loadDataTotalTimeMillis += loadTimeMillis;
@@ -107,7 +107,7 @@ public class AutoLoadBo implements Serializable {
         return this.loadDataTotalTimeMillis / this.loadCount;
     }
 
-    public IEzCacheProxy getProxy() {
+    public ICacheProxy getProxy() {
         return proxy;
     }
 
@@ -115,7 +115,7 @@ public class AutoLoadBo implements Serializable {
         return args;
     }
 
-    public EzCacheKeyBo getCacheKey() {
+    public CacheKeyBo getCacheKey() {
         return cacheKey;
     }
 
@@ -140,7 +140,7 @@ public class AutoLoadBo implements Serializable {
      * @param lastRequestTimeMillis
      * @return
      */
-    public AutoLoadBo setLastRequestTime(long lastRequestTimeMillis) {
+    public AutoRefreshBo setLastRequestTime(long lastRequestTimeMillis) {
         synchronized (this) {
             this.lastRequestTimeMillis = lastRequestTimeMillis;
             if (firstRequestTimeMillis == 0) {
@@ -171,7 +171,7 @@ public class AutoLoadBo implements Serializable {
         return loading;
     }
 
-    public AutoLoadBo setLoading(boolean loading) {
+    public AutoRefreshBo setLoading(boolean loading) {
         this.loading = loading;
         return this;
     }
@@ -188,7 +188,7 @@ public class AutoLoadBo implements Serializable {
         return lastLoadTimeMillis;
     }
 
-    public AutoLoadBo setLastLoadTimeMillis(long lastLoadTimeMillis) {
+    public AutoRefreshBo setLastLoadTimeMillis(long lastLoadTimeMillis) {
         this.lastLoadTimeMillis = lastLoadTimeMillis;
         return this;
     }

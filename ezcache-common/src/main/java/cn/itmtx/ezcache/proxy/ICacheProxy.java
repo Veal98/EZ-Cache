@@ -5,7 +5,7 @@ import java.lang.reflect.Method;
 /**
  * AOP 代理
  */
-public interface IEzCacheProxy {
+public interface ICacheProxy {
 
     /**
      * 获取参数

@@ -3,7 +3,7 @@ package cn.itmtx.ezcache.enums;
 /**
  * operation type for cache
  */
-public enum EzCacheOpTypeEnum {
+public enum CacheOpTypeEnum {
 
     /**
      * only read data from cache

@@ -2,7 +2,7 @@ package cn.itmtx.ezcache.bo;
 
 import java.io.Serializable;
 
-public class EzCacheBo<T> implements Serializable, Cloneable {
+public class CacheWrapper<T> implements Serializable, Cloneable {
 
     /**
      * 缓存数据

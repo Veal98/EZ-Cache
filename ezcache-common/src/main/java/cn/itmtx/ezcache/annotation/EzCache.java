@@ -1,6 +1,6 @@
 package cn.itmtx.ezcache.annotation;
 
-import cn.itmtx.ezcache.enums.EzCacheOpTypeEnum;
+import cn.itmtx.ezcache.enums.CacheOpTypeEnum;
 
 import java.lang.annotation.*;
 
@@ -61,7 +61,7 @@ public @interface EzCache {
      * 缓存的操作类型：默认是 CACHE_READ_DATASOURCE_LOAD
      * @return
      */
-    EzCacheOpTypeEnum operationType() default EzCacheOpTypeEnum.CACHE_READ_DATASOURCE_LOAD;
+    CacheOpTypeEnum operationType() default CacheOpTypeEnum.CACHE_READ_DATASOURCE_LOAD;
 
     /**
      * 并发等待时间(毫秒),等待正在从 datasource 加载数据的线程返回的等待时间
