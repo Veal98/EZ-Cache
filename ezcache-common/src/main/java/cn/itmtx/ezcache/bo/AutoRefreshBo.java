@@ -6,7 +6,7 @@ import cn.itmtx.ezcache.proxy.ICacheProxy;
 import java.io.Serializable;
 
 /**
- * 用于处理自动加载数据到缓存
+ * 用于处理自动刷新数据到缓存
  */
 public class AutoRefreshBo implements Serializable {
 
@@ -25,7 +25,7 @@ public class AutoRefreshBo implements Serializable {
     private final EzCache cache;
 
     /**
-     * 缓存时长
+     * 缓存过期时长
      */
     private long expireTimeMils;
 
@@ -45,7 +45,7 @@ public class AutoRefreshBo implements Serializable {
     private long requestCount = 0L;
 
     /**
-     * 是否正在请求数据中
+     * 是否正在请求 datasource 数据中, 若是的话则不要执行自动刷新
      */
     private volatile boolean loading = false;
 
@@ -127,8 +127,9 @@ public class AutoRefreshBo implements Serializable {
         return expireTimeMils;
     }
 
-    public void setExpireTimeMils(long expireTimeMils) {
+    public AutoRefreshBo setExpireTimeMils(long expireTimeMils) {
         this.expireTimeMils = expireTimeMils;
+        return this;
     }
 
     public long getLastRequestTimeMillis() {

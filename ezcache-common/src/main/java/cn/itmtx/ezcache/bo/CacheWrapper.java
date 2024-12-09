@@ -19,6 +19,18 @@ public class CacheWrapper<T> implements Serializable, Cloneable {
      */
     private long expireMillis;
 
+    public CacheWrapper(T cacheObject, long expireMillis) {
+        this.cacheObject = cacheObject;
+        this.lastLoadTimeMillis = System.currentTimeMillis();
+        this.expireMillis = expireMillis;
+    }
+
+    public CacheWrapper(T cacheObject, long lastLoadTimeMillis, long expireMillis) {
+        this.cacheObject = cacheObject;
+        this.lastLoadTimeMillis = lastLoadTimeMillis;
+        this.expireMillis = expireMillis;
+    }
+
     public boolean isExpired() {
         if (expireMillis > 0) {
             // 假设 expireMillis = 3 天，如果这个缓存数据 3 天没有被使用过，则表示这个缓存国企

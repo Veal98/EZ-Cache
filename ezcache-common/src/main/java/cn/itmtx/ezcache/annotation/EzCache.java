@@ -32,13 +32,6 @@ public @interface EzCache {
      */
     long expireTimeMillis();
 
-    /**
-     * 缓存过期时间的表达式
-     * 优先使用 expireExp，若其执行结果为null或小于0时使用expire
-     *
-     * @return 时间
-     */
-    String expireExp() default "";
 
     /**
      * 缓存自动刷新时间(单位：毫秒)
@@ -50,12 +43,12 @@ public @interface EzCache {
     long autoLoadTimeMillis() default 0L;
 
     /**
-     * 当 autoLoad 为 true 时，若缓存数据在 tolerateTimeMillis 之内没有使用，则不再进行缓存自动刷新
-     * 如果 tolerateTimeMillis 为 0，则会一直自动刷新
-     * 默认 tolerateTimeMillis = 24小时
+     * 预警主动刷新时间(单位：秒)
+     * 必须满足 0 < refreshAlarmTimeMillis < expire 才有效
+     * 当缓存在 refreshAlarmTimeMillis 时间内即将过期的话，则主动刷新缓存内容
      * @return long 请求过期
      */
-    long autoLoadTolerateTimeMillis() default 86400000L;
+    long refreshAlarmTimeMillis() default 86400000L;
 
     /**
      * 缓存的操作类型：默认是 CACHE_READ_DATASOURCE_LOAD
@@ -68,7 +61,20 @@ public @interface EzCache {
      * 默认 1s
      * @return 时间
      */
-    long concurrentWaitTimeMillis() default 1000L;
+    long waitDatasourceTimeoutMillis() default 1000L;
 
+    /**
+     * 尝试获取分布式锁的时间（单位：毫秒, 默认 10s），在设置分布式锁的前提下，如果此项值大于0，则会使用分布式锁，如果小于等于0，则不会使用分布式锁。
+     *
+     * @return 分布式锁的缓存时间
+     */
+    long distributedLockTimeoutMillis() default 10000;
+
+    /**
+     * 是否开启锁降级
+     * 默认不开启;
+     * 如果开启，当分布式锁抛异常时不使用分布式锁
+     */
+    boolean openDistributedLockDown() default false;
 
 }

@@ -25,6 +25,26 @@ public class CacheKeyBo implements Serializable {
         this.key = key;
     }
 
+
+    /**
+     * build cache key
+     * @return
+     */
+    public String getCacheKey() {
+        if (null != this.namespace && this.namespace.length() > 0) {
+            return this.namespace + ":" + this.key;
+        }
+        return this.key;
+    }
+
+    /**
+     * build lock key
+     * @return
+     */
+    public String getLockKey() {
+        return this.getCacheKey() + ":lock";
+    }
+
     public String getNamespace() {
         return namespace;
     }
