@@ -5,7 +5,8 @@ import cn.itmtx.ezcache.bo.AutoRefreshBo;
 import cn.itmtx.ezcache.bo.CacheKeyBo;
 import cn.itmtx.ezcache.bo.CacheWrapper;
 import cn.itmtx.ezcache.bo.ProcessingBo;
-import cn.itmtx.ezcache.config.RefreshConfig;
+import cn.itmtx.ezcache.cacher.ICacheOperator;
+import cn.itmtx.ezcache.bo.CacheConfigBo;
 import cn.itmtx.ezcache.enums.CacheOpTypeEnum;
 import cn.itmtx.ezcache.lock.IDistributedLock;
 import cn.itmtx.ezcache.parser.AbstractExpressionParser;
@@ -27,7 +28,7 @@ public class CacheProcessor {
      */
     public final ConcurrentHashMap<CacheKeyBo, ProcessingBo> datasourceProcessingMap;
 
-    private final RefreshConfig refreshConfig;
+    private final CacheConfigBo cacheConfigBo;
 
     private final AbstractExpressionParser abstractExpressionParser;
 
@@ -47,13 +48,13 @@ public class CacheProcessor {
      */
     private CacheChangeListener cacheChangeListener;
 
-    public CacheProcessor(RefreshConfig refreshConfig, AbstractExpressionParser abstractExpressionParser, ICacheOperator cacheOperator, AutoRefreshProcessor autoRefreshProcessor, ActiveRefreshProcessor activeRefreshProcessor) {
-        this.refreshConfig = refreshConfig;
+    public CacheProcessor(CacheConfigBo cacheConfigBo, AbstractExpressionParser abstractExpressionParser, ICacheOperator cacheOperator, AutoRefreshProcessor autoRefreshProcessor, ActiveRefreshProcessor activeRefreshProcessor) {
+        this.cacheConfigBo = cacheConfigBo;
         this.abstractExpressionParser = abstractExpressionParser;
         this.cacheOperator = cacheOperator;
         this.autoRefreshProcessor = autoRefreshProcessor;
         this.activeRefreshProcessor = activeRefreshProcessor;
-        this.datasourceProcessingMap = new ConcurrentHashMap<>(refreshConfig.getProcessingMapSize());
+        this.datasourceProcessingMap = new ConcurrentHashMap<>(cacheConfigBo.getProcessingMapSize());
     }
 
     /**
@@ -239,7 +240,7 @@ public class CacheProcessor {
             throw new IllegalArgumentException("cache key for " + target.getClass().getName() + "." + methodName + " is empty");
         }
 
-        return new CacheKeyBo(refreshConfig.getNamespace(), key);
+        return new CacheKeyBo(cacheConfigBo.getNamespace(), key);
     }
 
     /**

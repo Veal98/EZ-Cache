@@ -11,9 +11,7 @@
   <modules>
     <module>ezcache-common</module>
     <module>ezcache-core</module>
-    <module>ezcache-cacher</module>
     <module>ezcache-springboot-starter</module>
-    <module>ezcache-serializer</module>
   </modules>
 
   <properties>

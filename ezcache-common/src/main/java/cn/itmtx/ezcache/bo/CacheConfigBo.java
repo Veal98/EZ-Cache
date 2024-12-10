@@ -1,6 +1,9 @@
-package cn.itmtx.ezcache.config;
+package cn.itmtx.ezcache.bo;
 
-public class RefreshConfig {
+/**
+ * 缓存处理相关的配置
+ */
+public class CacheConfigBo {
 
     /**
      * 命名空间

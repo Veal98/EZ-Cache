@@ -4,7 +4,7 @@ import cn.itmtx.ezcache.annotation.EzCache;
 import cn.itmtx.ezcache.bo.AutoRefreshBo;
 import cn.itmtx.ezcache.bo.CacheKeyBo;
 import cn.itmtx.ezcache.bo.CacheWrapper;
-import cn.itmtx.ezcache.config.RefreshConfig;
+import cn.itmtx.ezcache.bo.CacheConfigBo;
 import cn.itmtx.ezcache.proxy.ICacheProxy;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -17,7 +17,7 @@ public class AutoRefreshProcessor {
 
     private final CacheProcessor cacheProcessor;
 
-    private final RefreshConfig refreshConfig;
+    private final CacheConfigBo cacheConfigBo;
 
     /**
      * 自动刷新 Map
@@ -35,14 +35,14 @@ public class AutoRefreshProcessor {
      */
     private final Thread[] threads;
 
-    public AutoRefreshProcessor(CacheProcessor cacheProcessor, RefreshConfig refreshConfig) {
+    public AutoRefreshProcessor(CacheProcessor cacheProcessor, CacheConfigBo cacheConfigBo) {
         this.cacheProcessor = cacheProcessor;
-        this.refreshConfig = refreshConfig;
+        this.cacheConfigBo = cacheConfigBo;
 
-        if (this.refreshConfig.getThreadCnt() > 0) {
-            this.threads = new Thread[this.refreshConfig.getThreadCnt()];
-            this.autoLoadMap = new ConcurrentHashMap<>(this.refreshConfig.getMaxElementSize());
-            this.autoLoadQueue = new LinkedBlockingQueue<>(this.refreshConfig.getMaxElementSize());
+        if (this.cacheConfigBo.getThreadCnt() > 0) {
+            this.threads = new Thread[this.cacheConfigBo.getThreadCnt()];
+            this.autoLoadMap = new ConcurrentHashMap<>(this.cacheConfigBo.getMaxElementSize());
+            this.autoLoadQueue = new LinkedBlockingQueue<>(this.cacheConfigBo.getMaxElementSize());
         } else {
             this.threads = null;
             this.autoLoadMap = null;

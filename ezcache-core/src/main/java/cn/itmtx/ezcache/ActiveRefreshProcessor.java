@@ -3,12 +3,11 @@ package cn.itmtx.ezcache;
 import cn.itmtx.ezcache.annotation.EzCache;
 import cn.itmtx.ezcache.bo.CacheKeyBo;
 import cn.itmtx.ezcache.bo.CacheWrapper;
-import cn.itmtx.ezcache.config.RefreshConfig;
+import cn.itmtx.ezcache.bo.CacheConfigBo;
 import cn.itmtx.ezcache.proxy.ICacheProxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -36,19 +35,19 @@ public class ActiveRefreshProcessor {
      */
     private final ConcurrentHashMap<CacheKeyBo, Byte> activeRefreshingMap;
 
-    public ActiveRefreshProcessor(CacheProcessor cacheProcessor, RefreshConfig refreshConfig) {
+    public ActiveRefreshProcessor(CacheProcessor cacheProcessor, CacheConfigBo cacheConfigBo) {
         this.cacheProcessor = cacheProcessor;
 
-        int queueCapacity = refreshConfig.getAsyncRefreshQueueCapacity();
+        int queueCapacity = cacheConfigBo.getAsyncRefreshQueueCapacity();
         activeRefreshingMap = new ConcurrentHashMap<CacheKeyBo, Byte>(queueCapacity);
 
         // 阻塞队列
         LinkedBlockingQueue<Runnable> activeRefreshingQueue = new LinkedBlockingQueue<Runnable>(queueCapacity);
         // 拒绝策略
         RejectedExecutionHandler rejectedExecutionHandler = new ThreadPoolExecutor.CallerRunsPolicy();
-        int corePoolSize = refreshConfig.getAsyncRefreshThreadPoolSize();
-        int maximumPoolSize = refreshConfig.getAsyncRefreshThreadPoolMaxSize();
-        int keepAliveTimeMillis = refreshConfig.getAsyncRefreshThreadPoolKeepAliveTimeMillis();
+        int corePoolSize = cacheConfigBo.getAsyncRefreshThreadPoolSize();
+        int maximumPoolSize = cacheConfigBo.getAsyncRefreshThreadPoolMaxSize();
+        int keepAliveTimeMillis = cacheConfigBo.getAsyncRefreshThreadPoolKeepAliveTimeMillis();
         activeRefreshThreadPoolExecutor = new ThreadPoolExecutor(
                 corePoolSize,
                 maximumPoolSize,

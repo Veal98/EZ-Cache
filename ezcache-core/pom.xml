@@ -20,7 +20,7 @@
     <dependencies>
         <dependency>
             <groupId>cn.itmtx.ezcache</groupId>
-            <artifactId>ezcache-cacher</artifactId>
+            <artifactId>ezcache-common</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

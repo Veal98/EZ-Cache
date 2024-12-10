@@ -1,4 +1,4 @@
-package cn.itmtx.ezcache;
+package cn.itmtx.ezcache.cacher;
 
 import cn.itmtx.ezcache.bo.CacheKeyBo;
 import cn.itmtx.ezcache.bo.CacheWrapper;

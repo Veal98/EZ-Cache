@@ -2,6 +2,9 @@ package cn.itmtx.ezcache.parser;
 
 import cn.itmtx.ezcache.annotation.EzCache;
 
+/**
+ * 表达式解析
+ */
 public abstract class AbstractExpressionParser {
 
     /**
