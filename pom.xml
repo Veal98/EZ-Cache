@@ -26,6 +26,8 @@
     <junit.version>4.3.1</junit.version>
     <slf4j.version>1.7.23</slf4j.version>
     <fast.json.version>2.0.15</fast.json.version>
+    <jedis.version>3.3.0</jedis.version>
+    <mybatis.version>2.2.2</mybatis.version>
   </properties>
 
   <dependencies>
@@ -71,6 +73,18 @@
         <version>${fast.json.version}</version>
       </dependency>
 
+      <dependency>
+        <groupId>redis.clients</groupId>
+        <artifactId>jedis</artifactId>
+        <version>${jedis.version}</version>
+      </dependency>
+
+      <!--MyBatis-->
+      <dependency>
+        <groupId>org.mybatis.spring.boot</groupId>
+        <artifactId>mybatis-spring-boot-starter</artifactId>
+        <version>${mybatis.version}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 

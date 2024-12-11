@@ -3,8 +3,13 @@ package cn.itmtx.ezcache.cacher.redis;
 import cn.itmtx.ezcache.bo.CacheKeyBo;
 import cn.itmtx.ezcache.bo.CacheWrapper;
 import cn.itmtx.ezcache.cacher.ICacheOperator;
+import cn.itmtx.ezcache.serializer.ISerializer;
+import cn.itmtx.ezcache.serializer.StringSerializer;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -13,6 +18,17 @@ import java.util.Set;
  * @Description
  **/
 public abstract class AbstractRedisCacheOperator implements ICacheOperator {
+
+    public static final StringSerializer KEY_SERIALIZER = new StringSerializer();
+
+    protected final ISerializer<Object> serializer;
+
+    public AbstractRedisCacheOperator(ISerializer<Object> serializer) {
+        this.serializer = serializer;
+    }
+
+    protected abstract IRedisClient getRedis();
+
     /**
      * 写数据到 cache
      *
@@ -45,5 +61,17 @@ public abstract class AbstractRedisCacheOperator implements ICacheOperator {
     @Override
     public void delete(Set<CacheKeyBo> cacheKeyBos) {
 
+    }
+
+    /**
+     * TODO 批量反序列化缓存 value
+     * @param keys
+     * @param values
+     * @param returnType
+     * @return
+     * @throws Exception
+     */
+    public Map<CacheKeyBo, CacheWrapper<Object>> deserialize(Set<CacheKeyBo> keys, Collection<Object> values, Type returnType) throws Exception {
+        return null;
     }
 }
