@@ -86,7 +86,7 @@ public class CacheProcessor {
         }
 
         // 2. 从缓存中读取数据
-        CacheWrapper<Object> cacheWrapper = cacheOperator.get(cacheKeyBo, method);
+        CacheWrapper<Object> cacheWrapper = cacheOperator.getCache(cacheKeyBo);
         log.info("cache key:{}, cache data is {} ", cacheKeyBo.getCacheKey(), cacheWrapper);
 
         if (CacheOpTypeEnum.CACHE_READ_ONLY.equals(cacheOpTypeEnum)) {
@@ -173,7 +173,7 @@ public class CacheProcessor {
         }
 
         // 存入缓存
-        cacheOperator.set(cacheKeyBo, cacheWrapper, method);
+        cacheOperator.setCache(cacheKeyBo, cacheWrapper);
         // 缓存变更监听器
         if (null != cacheChangeListener) {
             cacheChangeListener.update(cacheKeyBo, cacheWrapper);
@@ -317,8 +317,8 @@ public class CacheProcessor {
         this.distributedLock = distributedLock;
     }
 
-    public CacheWrapper<Object> getCacheWrapper(CacheKeyBo cacheKeyBo, Method method) {
-        return cacheOperator.get(cacheKeyBo, method);
+    public CacheWrapper<Object> getCacheWrapper(CacheKeyBo cacheKeyBo) {
+        return cacheOperator.getCache(cacheKeyBo);
     }
 
     public CacheChangeListener getCacheChangeListener() {

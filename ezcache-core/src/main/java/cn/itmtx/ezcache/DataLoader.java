@@ -190,7 +190,7 @@ public class DataLoader {
             } else if (LockStateEnum.UN_LOCKED.equals(lockState)) {
                 // 未获取到锁。在 waitDatasourceTimeoutMillis 时间内，一直尝试从缓存中获取数据（其实就是：等待获取到分布式锁的那个请求把从 datasource 中获取到的数据写入缓存）
                 do {
-                    cacheWrapper = cacheProcessor.getCacheWrapper(cacheKeyBo, proxy.getMethod());
+                    cacheWrapper = cacheProcessor.getCacheWrapper(cacheKeyBo);
                     if (null != cacheWrapper) {
                         break;
                     }
@@ -248,7 +248,7 @@ public class DataLoader {
 
         // 若走到这 cacheWrapper == null，则尝试从缓存服务器中获取数据
         if (null == cacheWrapper) {
-            cacheWrapper = cacheProcessor.getCacheWrapper(cacheKeyBo, proxy.getMethod());
+            cacheWrapper = cacheProcessor.getCacheWrapper(cacheKeyBo);
         }
 
         // 若本地内存、缓存服务器中的数据都为空，说明从 datasource 获取数据失败，进行重试

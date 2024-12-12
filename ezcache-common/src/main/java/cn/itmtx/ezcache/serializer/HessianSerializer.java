@@ -24,12 +24,11 @@ public class HessianSerializer implements ISerializer<Object>{
      * Deserialize an object from the given binary data.
      *
      * @param bytes      object binary representation
-     * @param returnType the GenericReturnType of AOP Method
      * @return the equivalent object instance, 必须是CacheWrapper类型的
      * @throws Exception 异常
      */
     @Override
-    public Object deserialize(byte[] bytes, Type returnType) throws Exception {
+    public Object deserialize(byte[] bytes) throws Exception {
         return null;
     }
 }
