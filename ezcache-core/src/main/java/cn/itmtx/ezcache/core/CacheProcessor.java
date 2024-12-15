@@ -95,6 +95,7 @@ public class CacheProcessor {
 
         // 1. 构建 cache key
         Method method = proxy.getMethod();
+        // TODO exception catch 处理，防止错误的 key 表达式影响原有正常方法流程
         CacheKeyBo cacheKeyBo = getCacheKeyBo(proxy, ezCache);
         if (null == cacheKeyBo) {
             // 如果 cache key 为空，则直接从 Datasource 中读数据，不对缓存做任何操作
@@ -246,6 +247,7 @@ public class CacheProcessor {
                 key = expressionParser.parseCacheKeyFromExpression(keyExpression, target, arguments, retVal, hasResult);
             } catch (Exception e) {
                 log.error(e.getMessage(), e);
+                throw new IllegalArgumentException("parse cache key failed. please check you cache key. " + e);
             }
         } else {
             // 默认 cache key

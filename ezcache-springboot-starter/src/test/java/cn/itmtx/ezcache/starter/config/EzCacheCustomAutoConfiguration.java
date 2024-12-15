@@ -25,7 +25,6 @@ public class EzCacheCustomAutoConfiguration {
 
     @Bean
     @Primary
-    @ConditionalOnMissingBean(ICacheOperator.class)
     public ICacheOperator cacheOperator(EzCacheProperties ezCacheProperties) {
         return new ConcurrentHashMapCacheOperator(ezCacheProperties.getCacheConfigBo());
     }
@@ -42,23 +41,18 @@ public class EzCacheCustomAutoConfiguration {
 
     @Bean
     @Primary
-    @ConditionalOnMissingBean(ISerializer.class)
     public ISerializer<Object> serializer() {
         return new HessianSerializer();
     }
 
     @Bean
     @Primary
-    @ConditionalOnMissingBean(IExpressionParser.class)
     public IExpressionParser expressionParser() {
         return new SpringElExpressionParser();
     }
 
     @Bean
     @Primary
-    @ConditionalOnMissingBean({IDistributedLock.class})
-    @ConditionalOnClass(RedisConnectionFactory.class)
-    @ConditionalOnBean(RedisConnectionFactory.class)
     public IDistributedLock distributedLock(RedisConnectionFactory connectionFactory) {
         if (null == connectionFactory) {
             return null;
