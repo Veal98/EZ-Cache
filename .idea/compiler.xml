@@ -6,14 +6,17 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="ezcache-core" />
+        <module name="ezcache-lock" />
+        <module name="ezcache-serializer" />
         <module name="ezcache-common" />
+        <module name="ezcache-parser" />
         <module name="ezcache-springboot-starter" />
+        <module name="ezcache-core" />
+        <module name="ezcache-operator" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="ezcache-cacher" target="1.8" />
-      <module name="ezcache-serializer" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>

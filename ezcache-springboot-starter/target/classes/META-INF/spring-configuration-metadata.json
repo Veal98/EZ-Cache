@@ -1,0 +1,52 @@
+{
+  "groups": [
+    {
+      "name": "ezcache",
+      "type": "cn.itmtx.ezcache.starter.autoconfigure.EzCacheProperties",
+      "sourceType": "cn.itmtx.ezcache.starter.autoconfigure.EzCacheProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "ezcache.aop-order",
+      "type": "java.lang.Integer",
+      "description": "EzCache 注解 AOP 执行顺序",
+      "sourceType": "cn.itmtx.ezcache.starter.autoconfigure.EzCacheProperties"
+    },
+    {
+      "name": "ezcache.cache-config-bo",
+      "type": "cn.itmtx.ezcache.common.bo.EzCacheConfigBo",
+      "sourceType": "cn.itmtx.ezcache.starter.autoconfigure.EzCacheProperties"
+    },
+    {
+      "name": "ezcache.cglib-proxy-target-class",
+      "type": "java.lang.Boolean",
+      "description": "是否使用 Cglib 创建代理; 若为 false 则使用标准的 JDK 动态代理",
+      "sourceType": "cn.itmtx.ezcache.starter.autoconfigure.EzCacheProperties"
+    },
+    {
+      "name": "ezcache.delete-aop-order",
+      "type": "java.lang.Integer",
+      "description": "EzCacheDelete 注解 AOP 执行顺序",
+      "sourceType": "cn.itmtx.ezcache.starter.autoconfigure.EzCacheProperties"
+    },
+    {
+      "name": "ezcache.enable",
+      "type": "java.lang.Boolean",
+      "description": "是否开启 EzCache 注解",
+      "sourceType": "cn.itmtx.ezcache.starter.autoconfigure.EzCacheProperties"
+    },
+    {
+      "name": "ezcache.env",
+      "type": "org.springframework.core.env.Environment",
+      "sourceType": "cn.itmtx.ezcache.starter.autoconfigure.EzCacheProperties"
+    },
+    {
+      "name": "ezcache.namespace-enable",
+      "type": "java.lang.Boolean",
+      "description": "是否使用 namespace",
+      "sourceType": "cn.itmtx.ezcache.starter.autoconfigure.EzCacheProperties"
+    }
+  ],
+  "hints": []
+}

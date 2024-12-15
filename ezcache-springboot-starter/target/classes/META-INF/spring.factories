@@ -1,0 +1,3 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+cn.itmtx.ezcache.starter.autoconfigure.EzCacheDefaultAutoConfiguration,\
+cn.itmtx.ezcache.starter.autoconfigure.EzCacheMustAutoConfiguration

@@ -20,12 +20,18 @@
     <dependencies>
         <dependency>
             <groupId>cn.itmtx.ezcache</groupId>
-            <artifactId>ezcache-common</artifactId>
+            <artifactId>ezcache-lock</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>redis.clients</groupId>
-            <artifactId>jedis</artifactId>
+            <groupId>cn.itmtx.ezcache</groupId>
+            <artifactId>ezcache-operator</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>cn.itmtx.ezcache</groupId>
+            <artifactId>ezcache-parser</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 

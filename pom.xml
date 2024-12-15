@@ -10,8 +10,12 @@
   <name>${project.artifactId}</name>
   <modules>
     <module>ezcache-common</module>
+    <module>ezcache-serializer</module>
+    <module>ezcache-lock</module>
+    <module>ezcache-operator</module>
     <module>ezcache-core</module>
     <module>ezcache-springboot-starter</module>
+      <module>ezcache-parser</module>
   </modules>
 
   <properties>
@@ -23,18 +27,31 @@
     <apache-commons-lang3.version>3.12.0</apache-commons-lang3.version>
     <ttl.version>2.12.0</ttl.version>
     <guava.version>29.0-jre</guava.version>
-    <junit.version>4.3.1</junit.version>
+    <junit.version>4.13.1</junit.version>
     <slf4j.version>1.7.23</slf4j.version>
     <fast.json.version>2.0.15</fast.json.version>
     <jedis.version>3.3.0</jedis.version>
     <mybatis.version>2.2.2</mybatis.version>
+    <spring-boot.version>2.7.2</spring-boot.version>
+    <spring.version>5.3.22</spring.version>
+    <hessian.version>4.0.38</hessian.version>
   </properties>
-
-  <dependencies>
-  </dependencies>
 
   <dependencyManagement>
     <dependencies>
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>${spring-boot.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-expression</artifactId>
+        <version>${spring.version}</version>
+      </dependency>
+
       <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
       <dependency>
         <groupId>org.apache.commons</groupId>
@@ -85,8 +102,22 @@
         <artifactId>mybatis-spring-boot-starter</artifactId>
         <version>${mybatis.version}</version>
       </dependency>
+
+      <dependency>
+        <groupId>com.caucho</groupId>
+        <artifactId>hessian</artifactId>
+        <version>4.0.38</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
+
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
 
   <build>
     <pluginManagement>
