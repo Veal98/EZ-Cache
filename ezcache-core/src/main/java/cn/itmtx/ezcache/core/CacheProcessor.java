@@ -3,19 +3,18 @@ package cn.itmtx.ezcache.core;
 import cn.itmtx.ezcache.common.annotation.EzCache;
 import cn.itmtx.ezcache.common.bo.CacheKeyBo;
 import cn.itmtx.ezcache.common.bo.CacheWrapper;
-import cn.itmtx.ezcache.common.bo.EzCacheConfigBo;
+import cn.itmtx.ezcache.common.bo.EzCacheConfig;
 import cn.itmtx.ezcache.common.enums.CacheOpTypeEnum;
-import cn.itmtx.ezcache.common.utils.EzCacheUtils;
 import cn.itmtx.ezcache.core.bo.AutoRefreshBo;
 import cn.itmtx.ezcache.core.bo.ProcessingBo;
 import cn.itmtx.ezcache.core.proxy.ICacheProxy;
+import cn.itmtx.ezcache.core.utils.CacheProcessorUtils;
 import cn.itmtx.ezcache.lock.IDistributedLock;
 import cn.itmtx.ezcache.operator.ICacheOperator;
 import cn.itmtx.ezcache.parser.IExpressionParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Method;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -31,7 +30,7 @@ public class CacheProcessor {
     /**
      * 用户配置
      */
-    private final EzCacheConfigBo ezCacheConfigBo;
+    private final EzCacheConfig ezCacheConfig;
 
     /**
      * 表达式解析器
@@ -63,14 +62,14 @@ public class CacheProcessor {
      */
     private CacheChangeListener cacheChangeListener;
 
-    public CacheProcessor(ICacheOperator cacheOperator, IExpressionParser expressionParser, EzCacheConfigBo ezCacheConfigBo) {
-        this.ezCacheConfigBo = ezCacheConfigBo;
+    public CacheProcessor(ICacheOperator cacheOperator, IExpressionParser expressionParser, EzCacheConfig ezCacheConfig) {
+        this.ezCacheConfig = ezCacheConfig;
         this.expressionParser = expressionParser;
         this.cacheOperator = cacheOperator;
 
-        this.autoRefreshProcessor = new AutoRefreshProcessor(this, ezCacheConfigBo);
-        this.activeRefreshProcessor = new ActiveRefreshProcessor(this, ezCacheConfigBo);
-        this.datasourceProcessingMap = new ConcurrentHashMap<>(ezCacheConfigBo.getProcessingMapSize());
+        this.autoRefreshProcessor = new AutoRefreshProcessor(this, ezCacheConfig);
+        this.activeRefreshProcessor = new ActiveRefreshProcessor(this, ezCacheConfig);
+        this.datasourceProcessingMap = new ConcurrentHashMap<>(ezCacheConfig.getProcessingMapSize());
     }
 
     /**
@@ -80,27 +79,20 @@ public class CacheProcessor {
      * @return
      */
     public Object process(ICacheProxy proxy, EzCache ezCache) throws Throwable {
-        Object[] args = proxy.getArgs();
-        CacheOpTypeEnum cacheOpTypeEnum = getCacheOpTypeEnum(ezCache);
+        CacheOpTypeEnum cacheOpTypeEnum = CacheOpTypeEnum.getCacheOpTypeEnum(ezCache);
         log.info("CacheProcessor.process-->{}.{}--{})", proxy.getTarget().getClass().getName(), proxy.getMethod().getName(), cacheOpTypeEnum.name());
 
         // 从 Datasource 中读数据到更新到缓存中
         if (cacheOpTypeEnum.equals(CacheOpTypeEnum.DATASOURCE_LOAD)) {
             // 从 datasource 中获取数据，并写入缓存
-            return loadDataFromDatasource(proxy, ezCache);
+            return readAndWriteFromDatasource(proxy, ezCache);
         } else if (cacheOpTypeEnum.equals(CacheOpTypeEnum.DATASOURCE_READ_ONLY)) {
             // 从 Datasource 中获取数据，不对缓存做任何操作
-            return readDataFromDatasource(proxy);
+            return justReadFromDatasource(proxy);
         }
 
-        // 1. 构建 cache key
-        Method method = proxy.getMethod();
-        // TODO exception catch 处理，防止错误的 key 表达式影响原有正常方法流程
-        CacheKeyBo cacheKeyBo = getCacheKeyBo(proxy, ezCache);
-        if (null == cacheKeyBo) {
-            // 如果 cache key 为空，则直接从 Datasource 中读数据，不对缓存做任何操作
-            return readDataFromDatasource(proxy);
-        }
+        // 1. 构建 cache key, 错误的 key 表达式将直接中断原有正常方法流程
+        CacheKeyBo cacheKeyBo = CacheProcessorUtils.getCacheKeyBo(expressionParser, ezCacheConfig, proxy, ezCache);
 
         // 2. 从缓存中读取数据
         CacheWrapper<Object> cacheWrapper = cacheOperator.getCache(cacheKeyBo);
@@ -170,7 +162,6 @@ public class CacheProcessor {
             return ;
         }
 
-        Method method = proxy.getMethod();
         Object cacheObject = cacheWrapper.getCacheObject();
         long expireTimeMillis = cacheWrapper.getExpireMillis();
 
@@ -198,76 +189,13 @@ public class CacheProcessor {
     }
 
     /**
-     * 生成缓存 KeyBo
-     *
-     * @param proxy
-     * @param cache
-     * @return String 缓存Key
-     */
-    private CacheKeyBo getCacheKeyBo(ICacheProxy proxy, EzCache cache) {
-        Object target = proxy.getTarget();
-        String methodName = proxy.getMethod().getName();
-        Object[] arguments = proxy.getArgs();
-        String keyExpression = cache.key();
-        return getCacheKeyBo(target, methodName, arguments, keyExpression, null, false);
-    }
-
-    /**
-     * 生成缓存 KeyBo
-     *
-     * @param proxy
-     * @param cache
-     * @param retVal 缓存数据
-     * @return String 缓存Key
-     */
-    private CacheKeyBo getCacheKeyBo(ICacheProxy proxy, EzCache cache, Object retVal) {
-        Object target = proxy.getTarget();
-        String methodName = proxy.getMethod().getName();
-        Object[] arguments = proxy.getArgs();
-        String keyExpression = cache.key();
-        return getCacheKeyBo(target, methodName, arguments, keyExpression, retVal, true);
-    }
-
-    /**
-     * 生成缓存 KeyBo
-     *
-     * @param target           类名
-     * @param methodName       方法名
-     * @param arguments        参数
-     * @param keyExpression    key表达式
-     * @param retVal           缓存数据
-     * @param hasResult        是否有返回值
-     * @return CacheKeyTO
-     */
-    public CacheKeyBo getCacheKeyBo(Object target, String methodName, Object[] arguments, String keyExpression, Object retVal, boolean hasResult) {
-        String key = null;
-        if (null != keyExpression && keyExpression.trim().length() > 0) {
-            // 优先解析 keyExpression
-            try {
-                key = expressionParser.parseCacheKeyFromExpression(keyExpression, target, arguments, retVal, hasResult);
-            } catch (Exception e) {
-                log.error(e.getMessage(), e);
-                throw new IllegalArgumentException("parse cache key failed. please check you cache key. " + e);
-            }
-        } else {
-            // 默认 cache key
-            key = EzCacheUtils.getDefaultCacheKey(target.getClass().getName(), methodName, arguments);
-        }
-
-        if (null == key || key.trim().isEmpty()) {
-            throw new IllegalArgumentException("cache key for " + target.getClass().getName() + "." + methodName + " is empty");
-        }
-
-        return new CacheKeyBo(ezCacheConfigBo.getNamespace(), key);
-    }
-
-    /**
      * Datasource 中获取数据，不对缓存做任何操作
      * @param proxy
      * @return
      */
-    private Object readDataFromDatasource(ICacheProxy proxy) {
-        return null;
+    private Object justReadFromDatasource(ICacheProxy proxy) throws Throwable {
+        Object[] args = proxy.getArgs();
+        return proxy.doProxy(args);
     }
 
     /**
@@ -277,7 +205,7 @@ public class CacheProcessor {
      * @param ezCache
      * @return
      */
-    private Object loadDataFromDatasource(ICacheProxy proxy, EzCache ezCache) throws Throwable {
+    private Object readAndWriteFromDatasource(ICacheProxy proxy, EzCache ezCache) throws Throwable {
 
         DataLoader dataLoader = new DataLoader();
         CacheWrapper<Object> cacheWrapper;
@@ -292,7 +220,7 @@ public class CacheProcessor {
         Object[] args = proxy.getArgs();
 
         if (expressionParser.isCacheable(ezCache, proxy.getTarget(), args, cacheObject)) {
-            CacheKeyBo cacheKeyBo = getCacheKeyBo(proxy, ezCache, cacheObject);
+            CacheKeyBo cacheKeyBo = CacheProcessorUtils.getCacheKeyBo(expressionParser, ezCacheConfig, proxy, ezCache, cacheObject);
             // 注意：这里只能获取 autoRefreshBo，不能生成 autoRefreshBo (autoRefreshProcessor.putIfAbsent)
             AutoRefreshBo autoRefreshBo = autoRefreshProcessor.getAutoRefreshBo(cacheKeyBo);
             try {
@@ -310,21 +238,6 @@ public class CacheProcessor {
         }
 
         return cacheObject;
-    }
-
-    /**
-     * 获取CacheOpType: 从Cache注解中获取
-     *
-     * @param cache     注解
-     * @return CacheOpType
-     */
-    private CacheOpTypeEnum getCacheOpTypeEnum(EzCache cache) {
-        // 从 EzCache 注解中解析 opType
-        CacheOpTypeEnum operationTypeEnum = cache.operationType();
-        if (null == operationTypeEnum) {
-            operationTypeEnum = CacheOpTypeEnum.CACHE_READ_DATASOURCE_LOAD;
-        }
-        return operationTypeEnum;
     }
 
     public void destroy() {

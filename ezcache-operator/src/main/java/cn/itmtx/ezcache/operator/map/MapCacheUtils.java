@@ -1,20 +1,16 @@
 package cn.itmtx.ezcache.operator.map;
 
-import cn.itmtx.ezcache.common.utils.OsUtil;
-
 import java.io.File;
 
 public class MapCacheUtils {
 
     private static String getSavePath(String namespace) {
-        String path = "/tmp/autoload-cache/";
-        if (null != namespace && namespace.trim().length() > 0) {
-            path += namespace.trim() + "/";
+        String path = "/temp/ez-cache/";
+        if (null != namespace && !namespace.trim().isEmpty()) {
+            // File.separator，它会自动根据运行环境返回正确的路径分隔符
+            path += namespace.trim() + File.separator;
         }
-        if (OsUtil.getInstance().isLinux()) {
-            return path;
-        }
-        return "C:" + path;
+        return path;
     }
 
     public static File getSaveFile(String namespace) {

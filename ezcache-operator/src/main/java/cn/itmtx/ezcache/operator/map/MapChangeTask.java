@@ -1,6 +1,7 @@
 package cn.itmtx.ezcache.operator.map;
 
 import cn.itmtx.ezcache.common.bo.CacheWrapper;
+import cn.itmtx.ezcache.common.bo.EzCacheConfig;
 import cn.itmtx.ezcache.serializer.hessian.HessianSerializer;
 import cn.itmtx.ezcache.serializer.ISerializer;
 import org.slf4j.Logger;
@@ -22,6 +23,8 @@ public class MapChangeTask implements Runnable{
 
     private final ConcurrentHashMapCacheOperator concurrentHashMapCacheOperator;
 
+    private final EzCacheConfig ezCacheConfig;
+
     /**
      * 缓存被修改的个数
      */
@@ -42,13 +45,9 @@ public class MapChangeTask implements Runnable{
      */
     private static final ISerializer<Object> PERSIST_SERIALIZER = new HessianSerializer();
 
-    /**
-     * TODO(做成可配置的) 允许不持久化变更数 (当缓存变更数量超过此值才做持久化操作)
-     */
-    private static final int UN_PERSIST_THRESHOLD = 0;
-
-    public MapChangeTask(ConcurrentHashMapCacheOperator concurrentHashMapCacheOperator) {
+    public MapChangeTask(ConcurrentHashMapCacheOperator concurrentHashMapCacheOperator, EzCacheConfig ezCacheConfig) {
         this.concurrentHashMapCacheOperator = concurrentHashMapCacheOperator;
+        this.ezCacheConfig = ezCacheConfig;
     }
 
     public void start() {
@@ -108,7 +107,8 @@ public class MapChangeTask implements Runnable{
      */
     private void persistCacheToDisk(boolean forcePersist) {
         int changedCnt = mapChanged.intValue();
-        if (!forcePersist && changedCnt <= UN_PERSIST_THRESHOLD) {
+        // 当 Map 变更数量超过配置的 mapUnPersistCountThreshold 时才做持久化操作即存入磁盘)
+        if (!forcePersist && changedCnt <= ezCacheConfig.getMapUnPersistCountThreshold()) {
             return;
         }
 

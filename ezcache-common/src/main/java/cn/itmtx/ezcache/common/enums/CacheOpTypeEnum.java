@@ -1,5 +1,7 @@
 package cn.itmtx.ezcache.common.enums;
 
+import cn.itmtx.ezcache.common.annotation.EzCache;
+
 /**
  * operation type for cache
  */
@@ -28,4 +30,18 @@ public enum CacheOpTypeEnum {
      * 从数据源读取最新的数据，并更新到缓存中
      */
     DATASOURCE_LOAD;
+
+    /**
+     * 获取 cacheOpType
+     * @param cache
+     * @return
+     */
+    public static CacheOpTypeEnum getCacheOpTypeEnum(EzCache cache) {
+        // 从 EzCache 注解中解析 opType
+        CacheOpTypeEnum operationTypeEnum = cache.operationType();
+        if (null == operationTypeEnum) {
+            operationTypeEnum = CacheOpTypeEnum.CACHE_READ_DATASOURCE_LOAD;
+        }
+        return operationTypeEnum;
+    }
 }

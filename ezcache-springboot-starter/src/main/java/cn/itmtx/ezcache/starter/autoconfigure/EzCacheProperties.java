@@ -1,6 +1,6 @@
 package cn.itmtx.ezcache.starter.autoconfigure;
 
-import cn.itmtx.ezcache.common.bo.EzCacheConfigBo;
+import cn.itmtx.ezcache.common.bo.EzCacheConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.core.env.Environment;
@@ -17,7 +17,7 @@ public class EzCacheProperties {
 
     public static final String PREFIX = "ezcache";
 
-    private EzCacheConfigBo config = new EzCacheConfigBo();
+    private EzCacheConfig config = new EzCacheConfig();
 
     @Autowired
     private Environment env;
@@ -62,12 +62,12 @@ public class EzCacheProperties {
 
     }
 
-    public EzCacheConfigBo getCacheConfigBo() {
+    public EzCacheConfig getCacheConfigBo() {
         return config;
     }
 
-    public void setCacheConfigBo(EzCacheConfigBo ezCacheConfigBo) {
-        this.config = ezCacheConfigBo;
+    public void setCacheConfigBo(EzCacheConfig ezCacheConfig) {
+        this.config = ezCacheConfig;
     }
 
     public Environment getEnv() {

@@ -10,6 +10,10 @@ import java.util.List;
 @Service
 public class TestService {
 
+    /**
+     * 测试表达式错误
+     * @return
+     */
     @EzCache(key = "'getTestBos' + #args[0] + '-' + #args[1] + #args[2] + '-' + #args[3]", expireTimeMillis = 10 * 1000)
     public List<TestBo> getTestBos_0() {
         return Arrays.asList(new TestBo("test1", 1L));

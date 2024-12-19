@@ -2,7 +2,7 @@ package cn.itmtx.ezcache.operator.map;
 
 import cn.itmtx.ezcache.common.bo.CacheKeyBo;
 import cn.itmtx.ezcache.common.bo.CacheWrapper;
-import cn.itmtx.ezcache.common.bo.EzCacheConfigBo;
+import cn.itmtx.ezcache.common.bo.EzCacheConfig;
 import cn.itmtx.ezcache.operator.ICacheOperator;
 import cn.itmtx.ezcache.operator.bo.CacheBatchSetBo;
 import org.slf4j.Logger;
@@ -16,7 +16,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * TODO 基于 ConcurrentHashMap 实现缓存
+ * 基于 ConcurrentHashMap 实现缓存
  */
 public class ConcurrentHashMapCacheOperator implements ICacheOperator {
 
@@ -32,7 +32,7 @@ public class ConcurrentHashMapCacheOperator implements ICacheOperator {
      */
     private static int MAP_INIT_SIZE = 1024;
 
-    private final EzCacheConfigBo ezCacheConfigBo;
+    private final EzCacheConfig ezCacheConfig;
 
     /**
      * map 变更通知
@@ -41,11 +41,11 @@ public class ConcurrentHashMapCacheOperator implements ICacheOperator {
 
     private final Thread mapChangeThread;
 
-    public ConcurrentHashMapCacheOperator(EzCacheConfigBo ezCacheConfigBo) {
-        this.ezCacheConfigBo = ezCacheConfigBo;
+    public ConcurrentHashMapCacheOperator(EzCacheConfig ezCacheConfig) {
+        this.ezCacheConfig = ezCacheConfig;
         this.map = new ConcurrentHashMap<>(MAP_INIT_SIZE);
 
-        this.mapChangeTask = new MapChangeTask(this);
+        this.mapChangeTask = new MapChangeTask(this, ezCacheConfig);
         this.mapChangeThread = new Thread(mapChangeTask);
         mapChangeTask.start();
         mapChangeThread.start();
@@ -165,8 +165,8 @@ public class ConcurrentHashMapCacheOperator implements ICacheOperator {
         }
     }
 
-    public EzCacheConfigBo getEzCacheConfigBo() {
-        return ezCacheConfigBo;
+    public EzCacheConfig getEzCacheConfigBo() {
+        return ezCacheConfig;
     }
 
     public ConcurrentHashMap<String, Object> getMap() {

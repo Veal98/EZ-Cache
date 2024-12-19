@@ -5,7 +5,7 @@ import cn.itmtx.ezcache.core.bo.AutoRefreshBo;
 import cn.itmtx.ezcache.common.bo.CacheKeyBo;
 import cn.itmtx.ezcache.common.bo.CacheWrapper;
 import cn.itmtx.ezcache.core.proxy.ICacheProxy;
-import cn.itmtx.ezcache.common.bo.EzCacheConfigBo;
+import cn.itmtx.ezcache.common.bo.EzCacheConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +21,7 @@ public class AutoRefreshProcessor {
 
     private final CacheProcessor cacheProcessor;
 
-    private final EzCacheConfigBo ezCacheConfigBo;
+    private final EzCacheConfig ezCacheConfig;
 
     /**
      * 自动刷新 Map
@@ -44,14 +44,14 @@ public class AutoRefreshProcessor {
      */
     private volatile boolean running = false;
 
-    public AutoRefreshProcessor(CacheProcessor cacheProcessor, EzCacheConfigBo ezCacheConfigBo) {
+    public AutoRefreshProcessor(CacheProcessor cacheProcessor, EzCacheConfig ezCacheConfig) {
         this.cacheProcessor = cacheProcessor;
-        this.ezCacheConfigBo = ezCacheConfigBo;
+        this.ezCacheConfig = ezCacheConfig;
 
-        if (this.ezCacheConfigBo.getThreadCnt() > 0) {
-            this.threads = new Thread[this.ezCacheConfigBo.getThreadCnt()];
-            this.autoRefreshMap = new ConcurrentHashMap<>(this.ezCacheConfigBo.getMaxElementSize());
-            this.autoRefreshQueue = new LinkedBlockingQueue<>(this.ezCacheConfigBo.getMaxElementSize());
+        if (this.ezCacheConfig.getThreadCnt() > 0) {
+            this.threads = new Thread[this.ezCacheConfig.getThreadCnt()];
+            this.autoRefreshMap = new ConcurrentHashMap<>(this.ezCacheConfig.getMaxElementSize());
+            this.autoRefreshQueue = new LinkedBlockingQueue<>(this.ezCacheConfig.getMaxElementSize());
         } else {
             this.threads = null;
             this.autoRefreshMap = null;

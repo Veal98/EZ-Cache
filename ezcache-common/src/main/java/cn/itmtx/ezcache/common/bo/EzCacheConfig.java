@@ -3,7 +3,7 @@ package cn.itmtx.ezcache.common.bo;
 /**
  * 缓存处理相关的配置
  */
-public class EzCacheConfigBo {
+public class EzCacheConfig {
 
     /**
      * 命名空间
@@ -44,6 +44,19 @@ public class EzCacheConfigBo {
      * 主动刷新：主动刷新(异步)线程池的 keepAliveTime（单位，毫秒）
      */
     private int asyncRefreshThreadPoolKeepAliveTimeMillis = 20000;
+
+    /**
+     * 允许 Map 的不持久化变更数 (若缓存选择 Map，当 Map 变更数量超过此值时才做持久化操作即存入磁盘)
+     */
+    private int mapUnPersistCountThreshold = 0;
+
+    public int getMapUnPersistCountThreshold() {
+        return mapUnPersistCountThreshold;
+    }
+
+    public void setMapUnPersistCountThreshold(int mapUnPersistCountThreshold) {
+        this.mapUnPersistCountThreshold = mapUnPersistCountThreshold;
+    }
 
     public int getProcessingMapSize() {
         return processingMapSize;
