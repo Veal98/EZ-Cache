@@ -26,6 +26,11 @@ public class EzCacheConfig {
     private int processingMapSize = 512;
 
     /**
+     * 默认同步主动刷新，若为 true 则开启异步主动刷新
+     */
+    private boolean asyncRefresh = false;
+
+    /**
      * 主动刷新：主动刷新(异步)队列的容量
      */
     private int asyncRefreshQueueCapacity = 2000;
@@ -49,6 +54,14 @@ public class EzCacheConfig {
      * 允许 Map 的不持久化变更数 (若缓存选择 Map，当 Map 变更数量超过此值时才做持久化操作即存入磁盘)
      */
     private int mapUnPersistCountThreshold = 0;
+
+    public boolean isAsyncRefresh() {
+        return asyncRefresh;
+    }
+
+    public void setAsyncRefresh(boolean asyncRefresh) {
+        this.asyncRefresh = asyncRefresh;
+    }
 
     public int getMapUnPersistCountThreshold() {
         return mapUnPersistCountThreshold;

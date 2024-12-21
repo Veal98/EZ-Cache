@@ -24,6 +24,8 @@ public class ActiveRefreshProcessor {
 
     private final CacheProcessor cacheProcessor;
 
+    private final EzCacheConfig ezCacheConfig;
+
     /**
      * 用于主动刷新缓存的线程池
      */
@@ -37,6 +39,7 @@ public class ActiveRefreshProcessor {
 
     public ActiveRefreshProcessor(CacheProcessor cacheProcessor, EzCacheConfig ezCacheConfig) {
         this.cacheProcessor = cacheProcessor;
+        this.ezCacheConfig = ezCacheConfig;
 
         int queueCapacity = ezCacheConfig.getAsyncRefreshQueueCapacity();
         activeRefreshingMap = new ConcurrentHashMap<CacheKeyBo, Byte>(queueCapacity);
@@ -67,6 +70,16 @@ public class ActiveRefreshProcessor {
                 rejectedExecutionHandler);
     }
 
+    public void refresh(ICacheProxy proxy, EzCache ezCache, CacheKeyBo cacheKeyBo, CacheWrapper<Object> cacheWrapper) {
+        if (ezCacheConfig.isAsyncRefresh()) {
+            // 异步刷新
+            this.asyncRefresh(proxy, ezCache, cacheKeyBo, cacheWrapper);
+        } else {
+            // 同步刷新
+            this.syncRefresh(proxy, ezCache, cacheKeyBo, cacheWrapper);
+        }
+    }
+
     /**
      * 异步刷新
      * 判断缓存是否快要过期，若快过期则刷新缓存
@@ -75,7 +88,7 @@ public class ActiveRefreshProcessor {
      * @param cacheKeyBo
      * @param cacheWrapper
      */
-    public void asyncRefresh(ICacheProxy proxy, EzCache ezCache, CacheKeyBo cacheKeyBo, CacheWrapper<Object> cacheWrapper) {
+    private void asyncRefresh(ICacheProxy proxy, EzCache ezCache, CacheKeyBo cacheKeyBo, CacheWrapper<Object> cacheWrapper) {
         // 判断是否可以执行刷新
         if (!this.isExecuteRefresh(ezCache, cacheKeyBo, cacheWrapper)) {
             return ;
@@ -99,7 +112,7 @@ public class ActiveRefreshProcessor {
      * @param cacheKeyBo
      * @param cacheWrapper
      */
-    public void refresh(ICacheProxy proxy, EzCache ezCache, CacheKeyBo cacheKeyBo, CacheWrapper<Object> cacheWrapper) {
+    private void syncRefresh(ICacheProxy proxy, EzCache ezCache, CacheKeyBo cacheKeyBo, CacheWrapper<Object> cacheWrapper) {
         // 判断是否可以执行刷新
         if (!this.isExecuteRefresh(ezCache, cacheKeyBo, cacheWrapper)) {
             return ;

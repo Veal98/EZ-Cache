@@ -94,8 +94,9 @@ public class DataLoader {
         // 2. 没有正在处理中的 datasource 请求
         if (Objects.isNull(processingBo)) {
             ProcessingBo newProcessingBo = new ProcessingBo();
+            // putIfAbsent(key,value): key 存在返回对应的 value, key 不存在返回 null
             ProcessingBo firstProcessingBo = cacheProcessor.datasourceProcessingMap.putIfAbsent(cacheKeyBo, newProcessingBo);
-            if (Objects.nonNull(firstProcessingBo)) {
+            if (Objects.isNull(firstProcessingBo)) {
                 // 当前 datasource 并发中的第一个请求
                 isFirst = true;
                 processingBo = newProcessingBo;
@@ -215,6 +216,10 @@ public class DataLoader {
      * @param lock
      */
     private void waitFirstRequestData(ProcessingBo processingBo, Object lock) throws Throwable {
+        if (Objects.isNull(processingBo)) {
+            return ;
+        }
+
         long startWaitLockTime = processingBo.getStartTime();
         String threadName = Thread.currentThread().getName();
         do {
@@ -284,7 +289,7 @@ public class DataLoader {
     }
 
     public CacheWrapper<Object> getCacheWrapper() {
-        return null;
+        return cacheWrapper;
     }
 
     public long getLoadDataTimeMills() {

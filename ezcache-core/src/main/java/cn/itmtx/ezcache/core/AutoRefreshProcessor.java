@@ -60,7 +60,7 @@ public class AutoRefreshProcessor {
     }
 
     /**
-     * 获取自动刷新的缓存相关信息
+     * TODO 获取自动刷新的缓存相关信息
      * @param cacheKeyBo
      * @return
      */
@@ -69,7 +69,7 @@ public class AutoRefreshProcessor {
     }
 
     /**
-     * 往自动刷新队列中添加任务
+     * TODO 往自动刷新队列中添加任务
      * @param cacheKeyBo
      * @param proxy
      * @param ezCache

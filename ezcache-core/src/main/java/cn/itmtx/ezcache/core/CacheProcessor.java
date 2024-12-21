@@ -96,7 +96,7 @@ public class CacheProcessor {
 
         // 2. 从缓存中读取数据
         CacheWrapper<Object> cacheWrapper = cacheOperator.getCache(cacheKeyBo);
-        log.info("cache key:{}, cache data is {} ", cacheKeyBo.getCacheKey(), cacheWrapper);
+        log.info("cache key:{}, cache data:{} ", cacheKeyBo.getCacheKey(), cacheWrapper);
 
         if (CacheOpTypeEnum.CACHE_READ_ONLY.equals(cacheOpTypeEnum)) {
             // 若是从缓存中只读数据，走到这可以直接返回了
@@ -112,7 +112,7 @@ public class CacheProcessor {
                 autoRefreshBo.flushRequestTime(cacheWrapper);
             } else {
                 // 若不支持自动刷新, 则判断缓存是否快过期，若快过期则进行主动刷新
-                activeRefreshProcessor.asyncRefresh(proxy, ezCache, cacheKeyBo, cacheWrapper);
+                activeRefreshProcessor.refresh(proxy, ezCache, cacheKeyBo, cacheWrapper);
             }
             return cacheWrapper.getCacheObject();
         }
