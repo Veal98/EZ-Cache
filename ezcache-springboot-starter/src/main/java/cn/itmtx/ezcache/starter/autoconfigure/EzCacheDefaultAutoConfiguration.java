@@ -17,7 +17,6 @@ import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 
 /**
  * @Author jc.yin
@@ -65,8 +64,6 @@ public class EzCacheDefaultAutoConfiguration {
     @ConditionalOnClass(ISerializer.class)
     @ConditionalOnBean(ISerializer.class)
     public ICacheOperator ezCacheCacheCacheOperator(ISerializer<Object> serializer) {
-        // TODO, spring data redis 连接池做成可配置的
-        JedisConnectionFactory connectionFactory = new JedisConnectionFactory();
-        return new SpringRedisCacheOperator(connectionFactory, serializer);
+        return new SpringRedisCacheOperator(serializer);
     }
 }

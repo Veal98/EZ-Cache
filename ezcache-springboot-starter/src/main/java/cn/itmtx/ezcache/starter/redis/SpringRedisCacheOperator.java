@@ -8,7 +8,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisConnectionUtils;
+import redis.clients.jedis.JedisPoolConfig;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -28,6 +30,24 @@ public class SpringRedisCacheOperator extends AbstractRedisCacheOperator {
      * Redis 连接池工厂
      */
     private final RedisConnectionFactory redisConnectionFactory;
+
+    /**
+     * 默认用 Jedis 连接池（TODO，新增 Lettuce 支持）
+     * @param serializer
+     */
+    public SpringRedisCacheOperator(ISerializer<Object> serializer) {
+        super(serializer);
+
+        JedisPoolConfig poolConfig = new JedisPoolConfig();
+        // 设置连接池参数，例如最大连接数、最大空闲连接数等
+        poolConfig.setMaxTotal(100);
+        poolConfig.setMaxIdle(30);
+        poolConfig.setMinIdle(10);
+        JedisConnectionFactory jedisConnectionFactory = new JedisConnectionFactory(poolConfig);
+        jedisConnectionFactory.afterPropertiesSet();
+
+        this.redisConnectionFactory = jedisConnectionFactory;
+    }
 
     public SpringRedisCacheOperator(RedisConnectionFactory redisConnectionFactory, ISerializer<Object> serializer) {
         super(serializer);

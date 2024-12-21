@@ -1,6 +1,8 @@
 package cn.itmtx.ezcache.starter.bo;
 
-public class TestBo {
+import java.io.Serializable;
+
+public class TestBo implements Serializable {
 
     private String name;
 

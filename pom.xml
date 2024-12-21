@@ -30,7 +30,7 @@
     <junit.version>4.13.1</junit.version>
     <slf4j.version>1.7.23</slf4j.version>
     <fast.json.version>2.0.15</fast.json.version>
-    <jedis.version>3.3.0</jedis.version>
+    <jedis.version>3.8.0</jedis.version>
     <mybatis.version>2.2.2</mybatis.version>
     <spring-boot.version>2.7.2</spring-boot.version>
     <spring.version>5.3.22</spring.version>
