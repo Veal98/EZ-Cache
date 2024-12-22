@@ -1,13 +1,13 @@
-package cn.itmtx.ezcache.core;
+package cn.itmtx.ezcache.core.datasource;
 
 import cn.itmtx.ezcache.common.annotation.EzCache;
+import cn.itmtx.ezcache.core.CacheProcessor;
+import cn.itmtx.ezcache.core.proxy.ICacheProxy;
 import cn.itmtx.ezcache.lock.IDistributedLock;
-import cn.itmtx.ezcache.core.bo.AutoRefreshBo;
+import cn.itmtx.ezcache.core.autorefresh.AutoRefreshBo;
 import cn.itmtx.ezcache.common.bo.CacheKeyBo;
 import cn.itmtx.ezcache.common.bo.CacheWrapper;
-import cn.itmtx.ezcache.core.bo.ProcessingBo;
 import cn.itmtx.ezcache.lock.enums.LockStateEnum;
-import cn.itmtx.ezcache.core.proxy.ICacheProxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,6 +84,9 @@ public class DataLoader {
 
     /**
      * 处理从 datasource 中获取数据的并发控制和请求等待逻辑
+     * 简单理解：每个机器上对 datasource 的并发请求选举出一个 leader，由这些每个机器的 leader 去进行分布式锁的争抢
+     * 争抢到分布式锁的 leader 获取 datasource 数据后，将其写入分布式缓存; 其他没有争抢到分布式锁的 leader 一直尝试去读取分布式缓存的数据
+     * 非 leader 请求等待各自机器的 leader 获取到数据
      * @return
      * @throws Throwable
      */
@@ -103,7 +106,7 @@ public class DataLoader {
             } else {
                 // 不是当前 datasource 并发中的第一个请求
                 isFirst = false;
-                // 获取到第一个线程的 ProcessingBo 的引用，保证所有请求都指向同一个引用
+                // 获取到第一个线程的 ProcessingBo 的引用，保证当前机器的所有请求都指向同一个引用
                 processingBo = firstProcessingBo;
             }
         } else {
@@ -113,7 +116,7 @@ public class DataLoader {
 
         // 3. 有正在处理中的 datasource 请求
 
-        // 锁住当前 datasource 请求, 防止并发修改
+        // 锁住当前机器的 datasource 请求, 防止并发修改
         Object lock = processingBo;
         String threadName = Thread.currentThread().getName();
         if (isFirst) {
@@ -190,7 +193,7 @@ public class DataLoader {
                     }
                 }
             } else if (LockStateEnum.UN_LOCKED.equals(lockState)) {
-                // 未获取到锁。在 waitDatasourceTimeoutMillis 时间内，一直尝试从缓存中获取数据（其实就是：等待获取到分布式锁的那个请求把从 datasource 中获取到的数据写入缓存）
+                // 未获取到锁。在 waitDatasourceTimeoutMillis 时间内，一直尝试从缓存中获取数据（其实就是：等待获取到分布式锁的那个机器的请求把从 datasource 中获取到的数据写入缓存）
                 do {
                     cacheWrapper = cacheProcessor.getCacheWrapper(cacheKeyBo);
                     if (null != cacheWrapper) {
@@ -225,7 +228,7 @@ public class DataLoader {
         do {
             // 第一个请求结束
             if (processingBo.isFirstFinished()) {
-                // 从本地内存获取数据，防止频繁去缓存服务器取数据，造成缓存服务器压力过大
+                // 优先从本地内存获取数据，防止频繁去缓存服务器取数据，造成缓存服务器压力过大
                 CacheWrapper<Object> tempCacheWrapper = processingBo.getCacheWrapper();
                 log.info("{} do FirstFinished, cache is null :{}", threadName, (null == tempCacheWrapper));
                 if (null != tempCacheWrapper) {

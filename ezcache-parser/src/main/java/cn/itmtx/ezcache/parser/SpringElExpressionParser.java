@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @Date 2024/12/10
  * @Description
  **/
-public class SpringElExpressionParser implements IExpressionParser {
+public class SpringElExpressionParser extends AbstractExpressionParser {
 
     private final ExpressionParser parser = new SpelExpressionParser();
 
@@ -56,7 +56,7 @@ public class SpringElExpressionParser implements IExpressionParser {
      * @throws Exception 异常
      */
     @Override
-    public <T> T parseExpression(String exp, Object target, Object[] args, Object retVal, boolean hasRetVal, Class<T> expValueType) throws Exception {
+    protected  <T> T parseExpression(String exp, Object target, Object[] args, Object retVal, boolean hasRetVal, Class<T> expValueType) throws Exception {
         if (expValueType.equals(String.class)) {
             // 如果期望的返回类型是String，并且表达式中不包含#（SpEL的标识符）和单引号（可能的字符串字面量），则直接返回表达式字符串
             if (exp.indexOf(CommonConstant.POUND) == -1 && exp.indexOf("'") == -1) {
@@ -67,14 +67,14 @@ public class SpringElExpressionParser implements IExpressionParser {
         StandardEvaluationContext context = new StandardEvaluationContext();
 
         // 注册两个内置函数HASH和EMPTY，这些函数 用于SpEL表达式中
-        context.registerFunction(IExpressionParser.HASH_FUNC_NAME, HASH_FUNC);
-        context.registerFunction(IExpressionParser.EMPTY_FUNC_NAME, EMPTY_FUNC);
+        context.registerFunction(AbstractExpressionParser.HASH_FUNC_NAME, HASH_FUNC);
+        context.registerFunction(AbstractExpressionParser.EMPTY_FUNC_NAME, EMPTY_FUNC);
 
         // 将target、arguments和 retVal 设置为上下文变量，以便在SpEL表达式中使用
-        context.setVariable(IExpressionParser.TARGET_VAR_NAME, target);
-        context.setVariable(IExpressionParser.ARGS_VAR_NAME, args);
+        context.setVariable(AbstractExpressionParser.TARGET_VAR_NAME, target);
+        context.setVariable(AbstractExpressionParser.ARGS_VAR_NAME, args);
         if (hasRetVal) {
-            context.setVariable(IExpressionParser.RET_VAL_VAR_NAME, retVal);
+            context.setVariable(AbstractExpressionParser.RET_VAL_VAR_NAME, retVal);
         }
 
         // 尝试从缓存expCache中获取已解析的表达式。如果未缓存，则解析表达式并缓存

@@ -13,12 +13,17 @@ public class EzCacheConfig {
     /**
      * 自动刷新：处理自动刷新队列的线程数量
      */
-    private Integer threadCnt = 10;
+    private Integer autoRefreshThreadCount = 10;
 
     /**
-     * 自动刷新：自动刷新队列中允许存放的最大容量
+     * 自动刷新：自动刷新队列的容量
      */
-    private int maxElementSize = 20000;
+    private int autoRefreshMaxQueueCapacity = 20000;
+
+    /**
+     * 自动刷新队列的排序算法：AutoRefreshQueueSortTypeEnum.getCode
+     */
+    private int autoRefreshQueueSortType = 0;
 
     /**
      * 从 datasource 获取数据的 Processing Map 初始大小
@@ -55,6 +60,14 @@ public class EzCacheConfig {
      */
     private int mapUnPersistCountThreshold = 0;
 
+    public int getAutoRefreshQueueSortType() {
+        return autoRefreshQueueSortType;
+    }
+
+    public void setAutoRefreshQueueSortType(int autoRefreshQueueSortType) {
+        this.autoRefreshQueueSortType = autoRefreshQueueSortType;
+    }
+
     public boolean isAsyncRefresh() {
         return asyncRefresh;
     }
@@ -87,20 +100,20 @@ public class EzCacheConfig {
         this.namespace = namespace;
     }
 
-    public Integer getThreadCnt() {
-        return threadCnt;
+    public Integer getAutoRefreshThreadCount() {
+        return autoRefreshThreadCount;
     }
 
-    public void setThreadCnt(Integer threadCnt) {
-        this.threadCnt = threadCnt;
+    public void setAutoRefreshThreadCount(Integer autoRefreshThreadCount) {
+        this.autoRefreshThreadCount = autoRefreshThreadCount;
     }
 
-    public int getMaxElementSize() {
-        return maxElementSize;
+    public int getAutoRefreshMaxQueueCapacity() {
+        return autoRefreshMaxQueueCapacity;
     }
 
-    public void setMaxElementSize(int maxElementSize) {
-        this.maxElementSize = maxElementSize;
+    public void setAutoRefreshMaxQueueCapacity(int autoRefreshMaxQueueCapacity) {
+        this.autoRefreshMaxQueueCapacity = autoRefreshMaxQueueCapacity;
     }
 
     public int getAsyncRefreshQueueCapacity() {

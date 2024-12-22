@@ -1,4 +1,4 @@
-package cn.itmtx.ezcache.core.bo;
+package cn.itmtx.ezcache.core.datasource;
 
 import cn.itmtx.ezcache.common.bo.CacheWrapper;
 

@@ -1,10 +1,13 @@
-package cn.itmtx.ezcache.core;
+package cn.itmtx.ezcache.core.activerefresh;
 
 import cn.itmtx.ezcache.common.annotation.EzCache;
 import cn.itmtx.ezcache.common.bo.CacheKeyBo;
 import cn.itmtx.ezcache.common.bo.CacheWrapper;
-import cn.itmtx.ezcache.core.proxy.ICacheProxy;
 import cn.itmtx.ezcache.common.bo.EzCacheConfig;
+import cn.itmtx.ezcache.core.CacheProcessor;
+import cn.itmtx.ezcache.core.datasource.DataLoader;
+import cn.itmtx.ezcache.core.proxy.ICacheProxy;
+import cn.itmtx.ezcache.core.utils.RefreshUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,9 +21,11 @@ public class ActiveRefreshProcessor {
 
     private static final Logger log = LoggerFactory.getLogger(ActiveRefreshProcessor.class);
 
+    private static final String THREAD_NAME_PREFIX = "EzCache-ActiveRefreshThread(Async)-";
+
     public static final long ALARM_REFRESH_TIME_MILLIS_THRESHOLD = 10 * 60 * 1000;
 
-    private static final int MIN_REFRESH_TIME_MILLIS = 2 * 60 * 1000;
+    public static final int MIN_REFRESH_TIME_MILLIS = 2 * 60 * 1000;
 
     private final CacheProcessor cacheProcessor;
 
@@ -37,9 +42,9 @@ public class ActiveRefreshProcessor {
      */
     private final ConcurrentHashMap<CacheKeyBo, Byte> activeRefreshingMap;
 
-    public ActiveRefreshProcessor(CacheProcessor cacheProcessor, EzCacheConfig ezCacheConfig) {
+    public ActiveRefreshProcessor(CacheProcessor cacheProcessor) {
         this.cacheProcessor = cacheProcessor;
-        this.ezCacheConfig = ezCacheConfig;
+        this.ezCacheConfig = cacheProcessor.getEzCacheConfig();
 
         int queueCapacity = ezCacheConfig.getAsyncRefreshQueueCapacity();
         activeRefreshingMap = new ConcurrentHashMap<CacheKeyBo, Byte>(queueCapacity);
@@ -61,8 +66,7 @@ public class ActiveRefreshProcessor {
 
                     @Override
                     public Thread newThread(Runnable r) {
-                        String namePrefix = "EzCache-ActiveRefreshHandler(Async)-";
-                        Thread t = new Thread(r, namePrefix + threadNumber.getAndIncrement());
+                        Thread t = new Thread(r, THREAD_NAME_PREFIX + threadNumber.getAndIncrement());
                         t.setDaemon(true);
                         return t;
                     }
@@ -129,41 +133,16 @@ public class ActiveRefreshProcessor {
      * @return
      */
     private boolean isExecuteRefresh(EzCache ezCache, CacheKeyBo cacheKeyBo, CacheWrapper<Object> cacheWrapper) {
-        long expireMillis = cacheWrapper.getExpireMillis();
-
-        // 如果过期时间太小了，则不进行刷新，避免刷新过于频繁，影响系统稳定性
-        if (expireMillis < MIN_REFRESH_TIME_MILLIS) {
-            return false;
-        }
-
-        // 计算超时时间
-        long alarmTimeMillis = ezCache.refreshAlarmTimeMillis();
-        long timeout;
-        if (alarmTimeMillis > 0 && alarmTimeMillis < expireMillis) {
-            timeout = expireMillis - alarmTimeMillis;
-        } else {
-            // 如果没有设置预警主动刷新时间，给一个默认时间
-            if (alarmTimeMillis >= ALARM_REFRESH_TIME_MILLIS_THRESHOLD) {
-                // 缓存过期前 2min 执行自动刷新
-                timeout = expireMillis - MIN_REFRESH_TIME_MILLIS;
-            } else {
-                // 缓存过期前 1min 执行自动刷新
-                timeout = expireMillis - MIN_REFRESH_TIME_MILLIS / 2;
-            }
-        }
-
-        // 上次从 datasource 加载数据的时间 < timeout，则不需要进行刷新
-        if ((System.currentTimeMillis() - cacheWrapper.getLastLoadTimeMillis()) < (timeout * 1000)) {
-            return false;
-        }
-
         Byte tmpByte = activeRefreshingMap.get(cacheKeyBo);
         // 如果当前 key 有正在刷新的请求，则不处理
         if (null != tmpByte) {
             return false;
         }
 
-        return true;
+        long expireMillis = cacheWrapper.getExpireMillis();
+        long lastLoadTimeMillis = cacheWrapper.getLastLoadTimeMillis();
+        RefreshUtils.ExecuteRefreshBo executeRefresh = RefreshUtils.isAllowRefresh(ezCache, expireMillis, lastLoadTimeMillis);
+        return executeRefresh.getAllowRefresh();
     }
 
     /**

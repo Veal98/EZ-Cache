@@ -5,8 +5,12 @@ import cn.itmtx.ezcache.common.bo.CacheKeyBo;
 import cn.itmtx.ezcache.common.bo.CacheWrapper;
 import cn.itmtx.ezcache.common.bo.EzCacheConfig;
 import cn.itmtx.ezcache.common.enums.CacheOpTypeEnum;
-import cn.itmtx.ezcache.core.bo.AutoRefreshBo;
-import cn.itmtx.ezcache.core.bo.ProcessingBo;
+import cn.itmtx.ezcache.core.activerefresh.ActiveRefreshProcessor;
+import cn.itmtx.ezcache.core.autorefresh.AutoRefreshProcessor;
+import cn.itmtx.ezcache.core.autorefresh.AutoRefreshBo;
+import cn.itmtx.ezcache.core.datasource.ProcessingBo;
+import cn.itmtx.ezcache.core.datasource.DataLoader;
+import cn.itmtx.ezcache.core.listener.CacheChangeListener;
 import cn.itmtx.ezcache.core.proxy.ICacheProxy;
 import cn.itmtx.ezcache.core.utils.CacheProcessorUtils;
 import cn.itmtx.ezcache.lock.IDistributedLock;
@@ -67,8 +71,8 @@ public class CacheProcessor {
         this.expressionParser = expressionParser;
         this.cacheOperator = cacheOperator;
 
-        this.autoRefreshProcessor = new AutoRefreshProcessor(this, ezCacheConfig);
-        this.activeRefreshProcessor = new ActiveRefreshProcessor(this, ezCacheConfig);
+        this.autoRefreshProcessor = new AutoRefreshProcessor(this);
+        this.activeRefreshProcessor = new ActiveRefreshProcessor(this);
         this.datasourceProcessingMap = new ConcurrentHashMap<>(ezCacheConfig.getProcessingMapSize());
     }
 
@@ -82,7 +86,7 @@ public class CacheProcessor {
         CacheOpTypeEnum cacheOpTypeEnum = CacheOpTypeEnum.getCacheOpTypeEnum(ezCache);
         log.info("CacheProcessor.process-->{}.{}--{})", proxy.getTarget().getClass().getName(), proxy.getMethod().getName(), cacheOpTypeEnum.name());
 
-        // 从 Datasource 中读数据到更新到缓存中
+        // 从 Datasource 中读数据并更新到缓存中
         if (cacheOpTypeEnum.equals(CacheOpTypeEnum.DATASOURCE_LOAD)) {
             // 从 datasource 中获取数据，并写入缓存
             return readAndWriteFromDatasource(proxy, ezCache);
@@ -106,7 +110,7 @@ public class CacheProcessor {
         // 3.1 缓存中读到了数据并且没有过期
         if (null != cacheWrapper && !cacheWrapper.isExpired()) {
             // 往自动刷新队列中添加任务
-            AutoRefreshBo autoRefreshBo = autoRefreshProcessor.putIfAbsent(cacheKeyBo, proxy, ezCache, cacheWrapper);
+            AutoRefreshBo autoRefreshBo = autoRefreshProcessor.addRefreshTask(cacheKeyBo, proxy, ezCache, cacheWrapper);
             if (null != autoRefreshBo) {
                 // 更新自动刷新时间戳
                 autoRefreshBo.flushRequestTime(cacheWrapper);
@@ -136,7 +140,7 @@ public class CacheProcessor {
 
         if (isFirst) {
             // 往自动刷新队列中添加任务
-            AutoRefreshBo autoRefreshBo = autoRefreshProcessor.putIfAbsent(cacheKeyBo, proxy, ezCache, newCacheWrapper);
+            AutoRefreshBo autoRefreshBo = autoRefreshProcessor.addRefreshTask(cacheKeyBo, proxy, ezCache, newCacheWrapper);
             // 数据写入缓存
             this.reallyWriteCache(proxy, proxy.getArgs(), ezCache, cacheKeyBo, newCacheWrapper);
             if (null != autoRefreshBo) {
@@ -265,5 +269,29 @@ public class CacheProcessor {
 
     public void setCacheChangeListener(CacheChangeListener cacheChangeListener) {
         this.cacheChangeListener = cacheChangeListener;
+    }
+
+    public ConcurrentHashMap<CacheKeyBo, ProcessingBo> getDatasourceProcessingMap() {
+        return datasourceProcessingMap;
+    }
+
+    public EzCacheConfig getEzCacheConfig() {
+        return ezCacheConfig;
+    }
+
+    public IExpressionParser getExpressionParser() {
+        return expressionParser;
+    }
+
+    public ICacheOperator getCacheOperator() {
+        return cacheOperator;
+    }
+
+    public AutoRefreshProcessor getAutoRefreshProcessor() {
+        return autoRefreshProcessor;
+    }
+
+    public ActiveRefreshProcessor getActiveRefreshProcessor() {
+        return activeRefreshProcessor;
     }
 }

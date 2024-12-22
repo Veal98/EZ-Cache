@@ -1,6 +1,6 @@
 package cn.itmtx.ezcache.starter.aop.proxy;
 
-import cn.itmtx.ezcache.core.proxy.ICacheProxy;
+import cn.itmtx.ezcache.core.ICacheProxy;
 import org.aopalliance.intercept.MethodInvocation;
 
 import java.lang.reflect.Method;

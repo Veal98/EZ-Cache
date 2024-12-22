@@ -11,6 +11,12 @@ import java.lang.annotation.*;
 public @interface EzCache {
 
     /**
+     * 缓存的操作类型：默认是 CACHE_READ_DATASOURCE_LOAD
+     * @return
+     */
+    CacheOpTypeEnum operationType() default CacheOpTypeEnum.CACHE_READ_DATASOURCE_LOAD;
+
+    /**
      * 自定义缓存 Key，支持表达式
      *
      * @return String
@@ -25,36 +31,37 @@ public @interface EzCache {
     long expireTimeMillis();
 
     /**
-     * 缓存的条件表达式
+     * 是否启用缓存的条件表达式
      * 若为 false 则不进行缓存, true 或者空进行缓存
+     * 也可使用表达式构造复杂的条件
      *
      * @return String
      */
     String condition() default "";
 
-
     /**
-     * 缓存自动刷新时间(单位：毫秒)
-     * - 必须满足 0 < autoLoadTimeMillis < expireTimeMillis 才有效
-     * - 若缓存在 autoLoadTimeMillis 时间内即将过期，则会自动更新缓存内容
-     *
-     * @return 时间
+     * 是否开启自动刷新的条件表达式
+     * 若为 false 则不进行自动刷新, true 或者空进行自动刷新
+     * 也可使用表达式构造复杂的条件
+     * @return
      */
-    long autoLoadTimeMillis() default 0L;
+    String autoRefreshCondition() default "";
 
     /**
-     * 预警主动刷新时间(单位：秒)
+     * 若开启自动刷新，缓存数据持续 autoRefreshNoRequestTimeoutMillis(单位：毫秒) 没有被使用，就关闭对此缓存数据的自动刷新
+     * 如果 autoRefreshNoRequestTimeoutMillis 为 0 时，自动刷新会一直开启
+     *
+     * @return
+     */
+    long autoRefreshNoRequestTimeoutMillis() default 0L;
+
+    /**
+     * 预警缓存刷新时间(单位：秒)
      * 必须满足 0 < refreshAlarmTimeMillis < expire 才有效
-     * 当缓存在 refreshAlarmTimeMillis 时间内即将过期的话，则主动刷新缓存内容
+     * 当缓存在 refreshAlarmTimeMillis 时间内即将过期的话，则刷新缓存内容
      * @return long 请求过期
      */
     long refreshAlarmTimeMillis() default 86400000L;
-
-    /**
-     * 缓存的操作类型：默认是 CACHE_READ_DATASOURCE_LOAD
-     * @return
-     */
-    CacheOpTypeEnum operationType() default CacheOpTypeEnum.CACHE_READ_DATASOURCE_LOAD;
 
     /**
      * 并发等待时间(毫秒),等待正在从 datasource 加载数据的线程返回的等待时间

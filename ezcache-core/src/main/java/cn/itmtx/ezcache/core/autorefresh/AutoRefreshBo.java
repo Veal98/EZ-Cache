@@ -1,4 +1,4 @@
-package cn.itmtx.ezcache.core.bo;
+package cn.itmtx.ezcache.core.autorefresh;
 
 import cn.itmtx.ezcache.common.annotation.EzCache;
 import cn.itmtx.ezcache.common.bo.CacheKeyBo;
@@ -187,7 +187,7 @@ public class AutoRefreshBo implements Serializable {
         this.loadCount = loadCount;
     }
 
-    public long getLastLoadTime() {
+    public long getLastLoadTimeMillis() {
         return lastLoadTimeMillis;
     }
 
