@@ -6,6 +6,7 @@ import cn.itmtx.ezcache.parser.IExpressionParser;
 import cn.itmtx.ezcache.parser.SpringElExpressionParser;
 import cn.itmtx.ezcache.serializer.ISerializer;
 import cn.itmtx.ezcache.serializer.hessian.HessianSerializer;
+import cn.itmtx.ezcache.serializer.jdk.JdkSerializer;
 import cn.itmtx.ezcache.starter.redis.SpringRedisCacheOperator;
 import cn.itmtx.ezcache.starter.redis.SpringRedisDistributedLock;
 import org.springframework.context.annotation.Bean;
@@ -27,6 +28,7 @@ public class EzCacheCustomAutoConfiguration {
 //    }
 
     /**
+     * 指定缓存操作器
      * @param serializer
      * @return
      */
@@ -38,18 +40,31 @@ public class EzCacheCustomAutoConfiguration {
         return new SpringRedisCacheOperator(jedisConnectionFactory, serializer);
     }
 
+    /**
+     * 指定序列化器
+     * @return
+     */
     @Bean
     @Primary
     public ISerializer<Object> serializer() {
-        return new HessianSerializer();
+        return new JdkSerializer();
     }
 
+    /**
+     * 指定表达式解析器
+     * @return
+     */
     @Bean
     @Primary
     public IExpressionParser expressionParser() {
         return new SpringElExpressionParser();
     }
 
+    /**
+     * 指定分布式锁实现
+     * @param connectionFactory
+     * @return
+     */
     @Bean
     @Primary
     public IDistributedLock distributedLock(RedisConnectionFactory connectionFactory) {
