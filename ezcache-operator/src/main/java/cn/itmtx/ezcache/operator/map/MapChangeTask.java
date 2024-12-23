@@ -2,6 +2,7 @@ package cn.itmtx.ezcache.operator.map;
 
 import cn.itmtx.ezcache.common.bo.CacheWrapper;
 import cn.itmtx.ezcache.common.bo.EzCacheConfig;
+import cn.itmtx.ezcache.common.constant.CommonConstant;
 import cn.itmtx.ezcache.serializer.hessian.HessianSerializer;
 import cn.itmtx.ezcache.serializer.ISerializer;
 import org.slf4j.Logger;
@@ -213,7 +214,7 @@ public class MapChangeTask implements Runnable{
             }
             try {
                 // sleep 1min, 防止 cpu 压力过大
-                Thread.sleep(60 * 1000);
+                Thread.sleep(60 * CommonConstant.ONE_THOUSAND_MILLIS);
             } catch (InterruptedException e) {
                 logger.error(e.getMessage(), e);
             }

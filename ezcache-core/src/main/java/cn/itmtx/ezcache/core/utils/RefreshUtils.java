@@ -1,12 +1,15 @@
 package cn.itmtx.ezcache.core.utils;
 
 import cn.itmtx.ezcache.common.annotation.EzCache;
+import cn.itmtx.ezcache.common.constant.CommonConstant;
+
+import java.util.concurrent.ThreadLocalRandom;
 
 public class RefreshUtils {
 
-    public static final long ALARM_REFRESH_TIME_MILLIS_THRESHOLD = 10 * 60 * 1000;
+    public static final long ALARM_REFRESH_TIME_MILLIS_THRESHOLD = 10 * 60 * CommonConstant.ONE_THOUSAND_MILLIS;
 
-    public static final int MIN_REFRESH_TIME_MILLIS = 2 * 60 * 1000;
+    public static final long MIN_REFRESH_TIME_MILLIS = 2 * 60 * CommonConstant.ONE_THOUSAND_MILLIS;
 
     /**
      * 判断缓存数据是否需要刷新
@@ -37,7 +40,10 @@ public class RefreshUtils {
             }
         }
 
-        // 上次从 datasource 加载数据的时间间隔 < refreshMillis，则不需要进行刷新
+        // 上次从 datasource 加载数据的时间间隔 < refreshMillis(加一个 10s 的随机值，防止缓存雪崩)，则不需要进行刷新
+        int randSeconds = ThreadLocalRandom.current().nextInt(10);
+        refreshMillis = (randSeconds % 2 == 0 ? randSeconds : -randSeconds) * CommonConstant.ONE_THOUSAND_MILLIS;
+
         boolean isExecuteRefresh = System.currentTimeMillis() - lastLoadTimeMillis >= refreshMillis;
 
         return isExecuteRefresh ? ExecuteRefreshBo.buildRefresh(refreshMillis) : ExecuteRefreshBo.buildNoRefresh();

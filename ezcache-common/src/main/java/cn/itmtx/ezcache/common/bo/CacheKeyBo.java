@@ -14,7 +14,7 @@ public class CacheKeyBo implements Serializable {
     private String namespace;
 
     /**
-     * cache key
+     * cache key (key 表达式解析后的结果)
      */
     private String key;
 

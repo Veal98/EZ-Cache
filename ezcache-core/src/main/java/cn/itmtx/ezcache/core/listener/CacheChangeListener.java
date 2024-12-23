@@ -7,6 +7,7 @@ import java.util.Set;
 
 /**
  * 缓存变更监听器
+ * TODO 接入消息通知
  */
 public interface CacheChangeListener {
 

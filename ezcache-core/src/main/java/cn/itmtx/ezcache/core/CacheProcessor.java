@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class CacheProcessor {
@@ -62,7 +63,7 @@ public class CacheProcessor {
     private IDistributedLock distributedLock;
 
     /**
-     * TODO 缓存变更监听器
+     * 缓存变更监听器
      */
     private CacheChangeListener cacheChangeListener;
 
@@ -242,6 +243,21 @@ public class CacheProcessor {
         }
 
         return cacheObject;
+    }
+
+    /**
+     * 删除缓存
+     * @param keys
+     */
+    public void deleteCache(Set<CacheKeyBo> keys) {
+        if (null == keys || keys.isEmpty()) {
+            return ;
+        }
+
+        cacheOperator.deleteCache(keys);
+        if (null != cacheChangeListener) {
+            cacheChangeListener.delete(keys);
+        }
     }
 
     public void destroy() {

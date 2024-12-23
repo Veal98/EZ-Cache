@@ -102,7 +102,7 @@ public class AutoRefreshBo implements Serializable {
      *
      * @return long 平均耗时
      */
-    public long getAvgLoadDataTime() {
+    public long getAvgLoadDataTimeMillis() {
         if (loadCount == 0) {
             return 0;
         }

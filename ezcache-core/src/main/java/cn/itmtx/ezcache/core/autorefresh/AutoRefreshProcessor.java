@@ -1,6 +1,7 @@
 package cn.itmtx.ezcache.core.autorefresh;
 
 import cn.itmtx.ezcache.common.annotation.EzCache;
+import cn.itmtx.ezcache.common.constant.CommonConstant;
 import cn.itmtx.ezcache.core.CacheProcessor;
 import cn.itmtx.ezcache.common.bo.CacheKeyBo;
 import cn.itmtx.ezcache.common.bo.CacheWrapper;
@@ -17,6 +18,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadLocalRandom;
@@ -29,11 +31,6 @@ public class AutoRefreshProcessor {
     private static final Logger log = LoggerFactory.getLogger(AutoRefreshProcessor.class);
 
     private static final String THREAD_NAME_PREFIX = "EzCache-AutoRefreshThread-";
-
-    /**
-     * 允许自动加载的缓存最小过期时间(2min)
-     */
-    public static final long ALLOW_AUTO_REFRESH_MIN_EXPIRE_MILLIS = 2 * 60 * 1000L;
 
     private final CacheProcessor cacheProcessor;
 
@@ -193,6 +190,18 @@ public class AutoRefreshProcessor {
     }
 
     /**
+     * 删除自动刷新任务
+     * @param cacheKeyBo
+     */
+    public void removeAutoRefreshBo(CacheKeyBo cacheKeyBo) {
+        if (null == autoRefreshMap) {
+            return ;
+        }
+
+        autoRefreshMap.remove(cacheKeyBo);
+    }
+
+    /**
      * 将任务排序，并放进队列中
      */
     private class SortRunnable implements Runnable {
@@ -248,11 +257,11 @@ public class AutoRefreshProcessor {
         public void run() {
             while (running) {
                 try {
-                    AutoRefreshBo bo = autoRefreshQueue.take();
-                    if (null != bo) {
+                    if (null != autoRefreshQueue) {
+                        AutoRefreshBo bo = autoRefreshQueue.take();
                         reallyRefresh(bo);
-                        Thread.sleep(100);
                     }
+                    Thread.sleep(100);
                 } catch (Exception e) {
                     log.error(e.getMessage(), e);
                 }
@@ -276,7 +285,7 @@ public class AutoRefreshProcessor {
             // 缓存数据持续 autoRefreshNoRequestTimeoutMillis(单位：毫秒) 没有被使用，就关闭对此缓存数据的自动刷新(从队列中删除)
             long noRequestTimeoutMillis = ezCache.autoRefreshNoRequestTimeoutMillis();
             if (noRequestTimeoutMillis > 0 && (now - autoRefreshBo.getLastRequestTimeMillis()) >= noRequestTimeoutMillis) {
-                autoRefreshMap.remove(cacheKeyBo);
+                Optional.ofNullable(autoRefreshMap).ifPresent(map -> autoRefreshMap.remove(cacheKeyBo));
                 return;
             }
 
@@ -326,9 +335,9 @@ public class AutoRefreshProcessor {
 
             // 只有首次请求才需要真正写入缓存
             if (isFirst) {
-                // TODO（这里会出现不一致性问题） 如果从 datasource 加载数据失败，则把旧数据进行续租 1min
+                // TODO（这里会出现不一致性问题） 如果从 datasource 加载数据失败，则把旧数据续租 3min
                 if (null == newCacheWrapper && null != result) {
-                    long newExpireMillis = ALLOW_AUTO_REFRESH_MIN_EXPIRE_MILLIS + 60 * 1000;
+                    long newExpireMillis = RefreshUtils.MIN_REFRESH_TIME_MILLIS + 60 * CommonConstant.ONE_THOUSAND_MILLIS;
                     newCacheWrapper = new CacheWrapper<Object>(result.getCacheObject(), newExpireMillis);
                 }
 

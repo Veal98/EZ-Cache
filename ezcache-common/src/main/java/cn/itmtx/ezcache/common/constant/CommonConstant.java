@@ -14,4 +14,9 @@ public class CommonConstant {
      */
     public static final String APOSTROPHE = "'";
 
+    /**
+     * 1000 毫秒
+     */
+    public static final Long ONE_THOUSAND_MILLIS = 1000L;
+
 }

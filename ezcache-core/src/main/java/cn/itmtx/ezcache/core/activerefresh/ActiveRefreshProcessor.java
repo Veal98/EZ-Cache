@@ -4,6 +4,7 @@ import cn.itmtx.ezcache.common.annotation.EzCache;
 import cn.itmtx.ezcache.common.bo.CacheKeyBo;
 import cn.itmtx.ezcache.common.bo.CacheWrapper;
 import cn.itmtx.ezcache.common.bo.EzCacheConfig;
+import cn.itmtx.ezcache.common.constant.CommonConstant;
 import cn.itmtx.ezcache.core.CacheProcessor;
 import cn.itmtx.ezcache.core.datasource.DataLoader;
 import cn.itmtx.ezcache.core.proxy.ICacheProxy;
@@ -23,9 +24,7 @@ public class ActiveRefreshProcessor {
 
     private static final String THREAD_NAME_PREFIX = "EzCache-ActiveRefreshThread(Async)-";
 
-    public static final long ALARM_REFRESH_TIME_MILLIS_THRESHOLD = 10 * 60 * 1000;
-
-    public static final int MIN_REFRESH_TIME_MILLIS = 2 * 60 * 1000;
+    public static final long MIN_REFRESH_TIME_MILLIS = 2 * 60 * CommonConstant.ONE_THOUSAND_MILLIS;
 
     private final CacheProcessor cacheProcessor;
 
@@ -164,11 +163,11 @@ public class ActiveRefreshProcessor {
 
         // 只有首次请求才需要真正写入缓存
         if (isFirst) {
-            // TODO（这里会出现不一致性问题） 如果数据加载失败，则把旧数据进行续租
+            // TODO（这里会出现不一致性问题） 如果数据加载失败，则把旧数据续租
             if (null == newCacheWrapper && null != cacheWrapper) {
                 long newExpireMillis = cacheWrapper.getExpireMillis() / 2;
-                if (newExpireMillis < 2 * 60 * 1000) {
-                    newExpireMillis = 2 * 60 * 1000;
+                if (newExpireMillis < MIN_REFRESH_TIME_MILLIS) {
+                    newExpireMillis = MIN_REFRESH_TIME_MILLIS;
                 }
                 newCacheWrapper = new CacheWrapper<Object>(cacheWrapper.getCacheObject(), newExpireMillis);
             }
