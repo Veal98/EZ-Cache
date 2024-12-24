@@ -16,6 +16,7 @@
     <module>ezcache-core</module>
     <module>ezcache-springboot-starter</module>
       <module>ezcache-parser</module>
+      <module>ezcache-notifier</module>
   </modules>
 
   <properties>

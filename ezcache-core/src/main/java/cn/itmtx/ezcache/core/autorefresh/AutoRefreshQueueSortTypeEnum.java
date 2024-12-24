@@ -1,5 +1,8 @@
 package cn.itmtx.ezcache.core.autorefresh;
 
+import cn.itmtx.ezcache.core.autorefresh.comparator.AutoRefreshOldestComparator;
+import cn.itmtx.ezcache.core.autorefresh.comparator.AutoRefreshMostTimesComparator;
+
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Objects;
@@ -19,7 +22,7 @@ public enum AutoRefreshQueueSortTypeEnum {
     /**
      * 根据请求次数，倒序排序，请求次数越多，说明使用频率越高，造成并发的可能越大。
      */
-    REQUEST_TIMES_DESC(2, new AutoRefreshRequestCountComparator());
+    REQUEST_TIMES_DESC(2, new AutoRefreshMostTimesComparator());
 
 
     private Integer sortId;

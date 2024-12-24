@@ -101,6 +101,9 @@ public class CacheProcessor {
 
         // 2. 从缓存中读取数据
         CacheWrapper<Object> cacheWrapper = cacheOperator.getCache(cacheKeyBo);
+        if (null != cacheChangeListener) {
+            cacheChangeListener.query(cacheKeyBo, cacheWrapper);
+        }
         log.info("cache key:{}, cache data:{} ", cacheKeyBo.getCacheKey(), cacheWrapper);
 
         if (CacheOpTypeEnum.CACHE_READ_ONLY.equals(cacheOpTypeEnum)) {
